@@ -116,6 +116,7 @@ export default function StudyPlanTracker() {
   const [scheduleItems, setScheduleItems] = useState([]);
   const [availabilityItems, setAvailabilityItems] = useState([]);
   const [chatMessages, setChatMessages] = useState([]);
+  const [customStreams, setCustomStreams] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // 1. Initialize Auth
@@ -198,8 +199,15 @@ export default function StudyPlanTracker() {
       setChatMessages(msgs);
     });
 
+    // G) Custom Streams (Música añadida por usuarios)
+    const streamsRef = collection(db, 'artifacts', appId, 'public', 'data', 'streams');
+    const unsubStreams = onSnapshot(streamsRef, (snapshot) => {
+      const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setCustomStreams(items);
+    });
+
     return () => {
-      unsubProgress(); unsubVault(); unsubCal(); unsubSched(); unsubAvail(); unsubChat();
+      unsubProgress(); unsubVault(); unsubCal(); unsubSched(); unsubAvail(); unsubChat(); unsubStreams();
     };
   }, [user]);
 
@@ -382,7 +390,7 @@ export default function StudyPlanTracker() {
         {activeTab === 'calendar' && <CalendarView user={user} calendarEvents={calendarEvents} subjects={INITIAL_SUBJECTS} />}
         {activeTab === 'schedule' && <ScheduleView user={user} scheduleItems={scheduleItems} availabilityItems={availabilityItems} subjects={INITIAL_SUBJECTS} />}
         {activeTab === 'chat' && <ChatView user={user} chatMessages={chatMessages} />}
-        {activeTab === 'focus' && <FocusView activeStream={activeStream} setActiveStream={setActiveStream} />}
+        {activeTab === 'focus' && <FocusView user={user} activeStream={activeStream} setActiveStream={setActiveStream} customStreams={customStreams} />}
       </main>
 
       {/* REPRODUCTOR GLOBAL FLOTANTE */}
@@ -677,7 +685,11 @@ function CalendarView({ user, calendarEvents, subjects }) {
       {showForm && (
         <form onSubmit={handleAdd} className="bg-white p-5 rounded-xl border border-teal-200 mb-8 grid grid-cols-2 gap-4 shadow-sm">
           <input required placeholder="Título del evento" className="border border-slate-300 p-2 rounded-lg col-span-2 focus:ring-2 focus:ring-teal-500" onChange={e => setFormData({...formData, title: e.target.value})} />
-          <select className="border border-slate-300 p-2 rounded-lg focus:ring-2 focus:ring-teal-500" onChange={e => setFormData({...formData, type: e.target.value})}><option value="Exam">Examen / Parcial</option><option value="TP">Trabajo Práctico</option></select>
+          <select className="border border-slate-300 p-2 rounded-lg focus:ring-2 focus:ring-teal-500" onChange={e => setFormData({...formData, type: e.target.value})}>
+            <option value="Exam">Examen / Parcial</option>
+            <option value="TP">Trabajo Práctico</option>
+            <option value="Exposicion">Exposición / Presentación</option>
+          </select>
           <input type="date" required className="border border-slate-300 p-2 rounded-lg focus:ring-2 focus:ring-teal-500" onChange={e => setFormData({...formData, date: e.target.value})} />
           <select className="border border-slate-300 p-2 rounded-lg col-span-2 focus:ring-2 focus:ring-teal-500" onChange={e => setFormData({...formData, subjectId: e.target.value})}>{subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
           <button type="submit" className="col-span-2 bg-teal-50 text-teal-700 font-bold py-2 rounded-lg hover:bg-teal-100 transition-colors">Guardar Fecha</button>
@@ -686,17 +698,18 @@ function CalendarView({ user, calendarEvents, subjects }) {
       <div className="space-y-3">
         {upcomingEvents.map(ev => {
            const isExam = ev.type === 'Exam';
+           const isExpo = ev.type === 'Exposicion';
            const dateObj = new Date(ev.date + "T00:00:00");
            return (
-            <div key={ev.id} className={`bg-white rounded-xl border flex relative overflow-hidden shadow-sm ${isExam ? 'border-orange-200' : 'border-blue-200'}`}>
+            <div key={ev.id} className={`bg-white rounded-xl border flex relative overflow-hidden shadow-sm ${isExam ? 'border-orange-200' : isExpo ? 'border-purple-200' : 'border-blue-200'}`}>
               {user.uid === ev.authorId && <button onClick={() => deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'calendar', ev.id))} className="absolute top-4 right-4 text-slate-300 hover:text-red-500"><Trash2 size={16}/></button>}
-              <div className={`w-24 flex flex-col items-center justify-center border-r p-3 ${isExam ? 'bg-orange-50 border-orange-100' : 'bg-blue-50 border-blue-100'}`}>
-                <span className={`text-xs font-bold uppercase ${isExam ? 'text-orange-600' : 'text-blue-600'}`}>{dateObj.toLocaleDateString('es-ES', { month: 'short' })}</span>
-                <span className={`text-2xl font-black ${isExam ? 'text-orange-700' : 'text-blue-700'}`}>{dateObj.getDate()}</span>
+              <div className={`w-24 flex flex-col items-center justify-center border-r p-3 ${isExam ? 'bg-orange-50 border-orange-100' : isExpo ? 'bg-purple-50 border-purple-100' : 'bg-blue-50 border-blue-100'}`}>
+                <span className={`text-xs font-bold uppercase ${isExam ? 'text-orange-600' : isExpo ? 'text-purple-600' : 'text-blue-600'}`}>{dateObj.toLocaleDateString('es-ES', { month: 'short' })}</span>
+                <span className={`text-2xl font-black ${isExam ? 'text-orange-700' : isExpo ? 'text-purple-700' : 'text-blue-700'}`}>{dateObj.getDate()}</span>
               </div>
               <div className="pl-4 py-3 flex flex-col justify-center">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${isExam ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}`}>{isExam ? 'Examen' : 'Entrega'}</span>
+                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${isExam ? 'bg-orange-100 text-orange-700' : isExpo ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>{isExam ? 'Examen' : isExpo ? 'Exposición' : 'Entrega'}</span>
                 </div>
                 <h4 className="font-bold text-slate-800">{ev.title}</h4>
                 <p className="text-sm text-slate-500">{subjects.find(s=>s.id===ev.subjectId)?.name}</p>
@@ -879,25 +892,98 @@ function ChatView({ user, chatMessages }) {
 // ==========================================
 // VIEW: ZONA DE CONCENTRACIÓN (AUDIO REDUCIDO)
 // ==========================================
-function FocusView({ activeStream, setActiveStream }) {
+function FocusView({ user, activeStream, setActiveStream, customStreams }) {
+  const [showForm, setShowForm] = useState(false);
+  const [streamData, setStreamData] = useState({ title: '', url: '' });
+
   const STREAMS = [
     { id: 'lofi-1', category: 'Lo-Fi', title: 'Lofi Girl (Beats)', desc: 'Beats relajantes para estudiar', url: 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1', color: 'bg-purple-100 text-purple-700' },
-    { id: 'inst-1', category: 'Instrumental', title: 'Piano Clásico (3 Hs)', desc: 'Concentración profunda', url: 'https://www.youtube.com/embed/8MAJmEebX4A?autoplay=1', color: 'bg-blue-100 text-blue-700' },
+    { id: 'inst-1', category: 'Instrumental', title: 'Piano Clásico (3 Hs)', desc: 'Concentración profunda', url: 'https://www.youtube.com/embed/WJ3-F02-F_Y?autoplay=1', color: 'bg-blue-100 text-blue-700' },
   ];
 
+  const handleAddStream = async (e) => {
+    e.preventDefault();
+    if (!streamData.title || !streamData.url) return;
+    
+    let embedUrl = streamData.url;
+    // Convierte el enlace normal de YouTube en formato iframe (embed)
+    if (embedUrl.includes('youtube.com/watch') || embedUrl.includes('youtu.be/')) {
+      const videoId = embedUrl.split('v=')[1]?.split('&')[0] || embedUrl.split('youtu.be/')[1]?.split('?')[0];
+      if (videoId) {
+        embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+      }
+    }
+
+    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'streams'), {
+      title: streamData.title,
+      url: embedUrl,
+      category: 'Comunidad',
+      desc: `Añadido por ${user.displayName?.split(' ')[0] || 'Usuario'}`,
+      color: 'bg-teal-100 text-teal-700',
+      authorId: user.uid,
+      createdAt: Date.now()
+    });
+    
+    setStreamData({ title: '', url: '' });
+    setShowForm(false);
+  };
+
+  const handleDeleteStream = async (id, authorId) => {
+    if (user.uid !== authorId) return;
+    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'streams', id));
+    if (activeStream?.id === id) setActiveStream(null);
+  };
+
   return (
-    <div className="max-w-4xl mx-auto text-center">
+    <div className="max-w-4xl mx-auto text-center animate-in fade-in duration-500">
       <Headphones size={48} className="mx-auto text-teal-300 mb-4" />
-      <h2 className="text-2xl font-bold text-slate-800 mb-8">Elige tu música de estudio</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-        {STREAMS.map(stream => (
-          <button key={stream.id} onClick={() => setActiveStream(stream)}
-            className={`p-4 rounded-xl border-2 text-left transition-all ${activeStream?.id === stream.id ? 'border-teal-500 bg-teal-50 shadow-md' : 'bg-white hover:border-teal-300 hover:shadow-sm'}`}>
-            <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${stream.color}`}>{stream.category}</span>
-            <h4 className="font-bold mt-2 text-slate-800">{stream.title}</h4>
-            <p className="text-xs text-slate-500 mt-1">{stream.desc}</p>
-          </button>
-        ))}
+      <h2 className="text-2xl font-bold text-slate-800 mb-2">Elige tu música de estudio</h2>
+      <p className="text-slate-500 mb-8">Escucha las estaciones por defecto o añade enlaces de YouTube a la colección.</p>
+      
+      <div className="flex justify-center mb-8">
+        <button onClick={() => setShowForm(!showForm)} className="bg-teal-600 text-white px-5 py-2.5 rounded-lg hover:bg-teal-700 transition-colors flex items-center gap-2 shadow-sm font-medium">
+          <Plus size={18} /> Añadir Playlist de YouTube
+        </button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={handleAddStream} className="bg-white p-5 rounded-xl border border-teal-200 mb-8 grid grid-cols-1 md:grid-cols-2 gap-4 shadow-md max-w-2xl mx-auto text-left">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Nombre de la Playlist</label>
+            <input required placeholder="Ej: Rock instrumental" className="w-full border border-slate-300 p-2.5 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" value={streamData.title} onChange={e => setStreamData({...streamData, title: e.target.value})} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Enlace de YouTube</label>
+            <input required placeholder="https://www.youtube.com/watch?v=..." className="w-full border border-slate-300 p-2.5 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" value={streamData.url} onChange={e => setStreamData({...streamData, url: e.target.value})} />
+          </div>
+          <button type="submit" className="md:col-span-2 bg-teal-50 text-teal-700 font-bold py-2.5 rounded-lg hover:bg-teal-100 transition-colors border border-teal-100">Compartir con la comunidad</button>
+        </form>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+        {[...STREAMS, ...customStreams].map(stream => {
+          const isCustom = stream.authorId;
+          const isOwner = isCustom && user.uid === stream.authorId;
+          
+          return (
+            <div key={stream.id} className="relative group">
+              {isOwner && (
+                <button onClick={(e) => { e.stopPropagation(); handleDeleteStream(stream.id, stream.authorId); }} className="absolute top-2 right-2 p-1.5 bg-white rounded-full text-slate-300 hover:text-red-500 hover:bg-red-50 shadow-sm z-10 opacity-0 group-hover:opacity-100 transition-all border border-slate-200" title="Eliminar Playlist">
+                  <Trash2 size={14} />
+                </button>
+              )}
+              <button onClick={() => setActiveStream(stream)}
+                className={`w-full h-full p-4 rounded-xl border-2 text-left transition-all flex flex-col ${activeStream?.id === stream.id ? 'border-teal-500 bg-teal-50 shadow-md ring-2 ring-teal-100' : 'bg-white hover:border-teal-300 hover:shadow-sm border-slate-200'}`}>
+                <div className="flex justify-between w-full items-start mb-2">
+                  <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wide border ${stream.color}`}>{stream.category}</span>
+                  <PlayCircle className={activeStream?.id === stream.id ? 'text-teal-600' : 'text-slate-300'} size={18} />
+                </div>
+                <h4 className="font-bold text-slate-800 leading-tight mb-1">{stream.title}</h4>
+                <p className="text-[11px] text-slate-500 line-clamp-1">{stream.desc}</p>
+              </button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
