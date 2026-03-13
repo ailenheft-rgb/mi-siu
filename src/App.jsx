@@ -76,7 +76,7 @@ const INITIAL_SUBJECTS = [
 
   // AÑO 3 - Cuatrimestre 2
   { id: 'prod_av2', name: 'Producción audiovisual II', year: 3, semester: 2, prereqs: ['prod_av1'] },
-  { id: 'psico_org', name: 'Psicosociología de las organizaciones', year: 3, semester: 2, prereqs: [] },
+  { id: 'psico_org', name: 'Psicosociología de las organizations', year: 3, semester: 2, prereqs: [] },
   { id: 'dir_com', name: 'Dirección en comunicación', year: 3, semester: 2, prereqs: ['dir_est'] },
   { id: 'ident_visual', name: 'Identidad visual corporativa', year: 3, semester: 2, prereqs: ['diseno'] },
   { id: 'emprend', name: 'Emprendimiento', year: 3, semester: 2, prereqs: ['prop_pub'] },
@@ -121,7 +121,6 @@ export default function StudyPlanTracker() {
   // 1. Initialize Auth
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      // MAGIA: Si detectamos que es un usuario anónimo viejo, lo deslogueamos forzadamente
       if (currentUser && currentUser.isAnonymous) {
         await signOut(auth);
         setUser(null);
@@ -138,7 +137,6 @@ export default function StudyPlanTracker() {
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
       console.error("Error logging in:", error);
-      // Alerta para mostrar si hay errores (ej. Dominio no autorizado)
       alert("No se pudo iniciar sesión. Verifica que el dominio esté autorizado en Firebase.\n\nDetalle técnico: " + error.message);
     }
   };
@@ -278,7 +276,7 @@ export default function StudyPlanTracker() {
 
   // PANTALLA DE CARGA
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-teal-600 font-semibold text-xl animate-pulse">Cargando Nexus...</div>;
+    return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-teal-600 font-semibold text-xl animate-pulse">Cargando Comunidad...</div>;
   }
 
   // PANTALLA DE LOGIN
@@ -289,7 +287,7 @@ export default function StudyPlanTracker() {
           <div className="bg-teal-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
             <GraduationCap size={40} className="text-teal-600" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">Nexus Estudiantil</h1>
+          <h1 className="text-3xl font-bold text-slate-800 mb-2">Comunidad Estudiantil</h1>
           <p className="text-slate-500 mb-8">Inicia sesión para guardar tu progreso, sincronizar tus notas y acceder a la comunidad de tu facultad.</p>
           
           <button 
@@ -323,7 +321,7 @@ export default function StudyPlanTracker() {
                   <GraduationCap size={28} />
                 </div>
                 <div>
-                  <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white drop-shadow-sm leading-none">Nexus Estudiantil</h1>
+                  <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white drop-shadow-sm leading-none">Comunidad Estudiantil</h1>
                   <span className="text-teal-100 text-xs font-medium">Hola, {user.displayName?.split(' ')[0] || 'Estudiante'}</span>
                 </div>
               </div>
@@ -469,7 +467,7 @@ function PlanView({ subjectsByGroup, completedSubjects, subjectDetails, getSubje
                   <Calendar size={16} /><span>1er Cuatrimestre</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {semesters[1].map(sub => <SubjectCardWrapper key={sub.id} subject={sub} subjectDetails={subjectDetails} onToggle={onSubjectClick} getSubjectStatus={getSubjectStatus} />)}
+                  {semesters[1].map(sub => <SubjectCardWrapper key={sub.id} subject={sub} subjectDetails={subjectDetails} completedSubjects={completedSubjects} onToggle={onSubjectClick} getSubjectStatus={getSubjectStatus} />)}
                 </div>
               </div>
               <div className="space-y-4">
@@ -477,7 +475,7 @@ function PlanView({ subjectsByGroup, completedSubjects, subjectDetails, getSubje
                   <Calendar size={16} /><span>2do Cuatrimestre</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {semesters[2].map(sub => <SubjectCardWrapper key={sub.id} subject={sub} subjectDetails={subjectDetails} onToggle={onSubjectClick} getSubjectStatus={getSubjectStatus} />)}
+                  {semesters[2].map(sub => <SubjectCardWrapper key={sub.id} subject={sub} subjectDetails={subjectDetails} completedSubjects={completedSubjects} onToggle={onSubjectClick} getSubjectStatus={getSubjectStatus} />)}
                 </div>
               </div>
             </div>
@@ -488,13 +486,20 @@ function PlanView({ subjectsByGroup, completedSubjects, subjectDetails, getSubje
   );
 }
 
-function SubjectCardWrapper({ subject, subjectDetails, onToggle, getSubjectStatus }) {
+function SubjectCardWrapper({ subject, subjectDetails, completedSubjects, onToggle, getSubjectStatus }) {
   const status = getSubjectStatus(subject);
   const detail = subjectDetails[subject.id];
-  return <SubjectCard subject={subject} status={status} detail={detail} onToggle={() => onToggle(subject.id, status)} />;
+  
+  // Calcular materias correlativas que faltan aprobar
+  const missingPrereqsNames = subject.prereqs.filter(preId => {
+    const preStatus = subjectDetails[preId]?.status;
+    return !(completedSubjects.includes(preId) || ['aprobada', 'promocion', 'final'].includes(preStatus));
+  }).map(id => INITIAL_SUBJECTS.find(s => s.id === id)?.name);
+
+  return <SubjectCard subject={subject} status={status} detail={detail} missingPrereqs={missingPrereqsNames} onToggle={() => onToggle(subject.id, status)} />;
 }
 
-function SubjectCard({ subject, status, detail, onToggle }) {
+function SubjectCard({ subject, status, detail, missingPrereqs, onToggle }) {
   const isLocked = status === 'locked';
   const isAprobada = ['aprobada', 'promocion', 'final'].includes(status);
   const isRegular = status === 'regular';
@@ -539,6 +544,19 @@ function SubjectCard({ subject, status, detail, onToggle }) {
         </div>
       )}
       {status === 'aprobada' && detail?.grade && <div className="mt-1 text-xs font-bold text-green-700 bg-green-100/50 w-fit px-2 py-0.5 rounded">Nota: {detail.grade}</div>}
+      
+      {/* Mostrar correlativas faltantes si está bloqueada */}
+      {isLocked && missingPrereqs && missingPrereqs.length > 0 && (
+        <div className="mt-auto pt-2">
+          <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-red-400 mb-0.5">
+            <AlertCircle size={10} />
+            <span>Falta correlativa</span>
+          </div>
+          <p className="text-[10px] text-slate-500 leading-tight">
+            {missingPrereqs[0]} {missingPrereqs.length > 1 && `+ ${missingPrereqs.length - 1} más`}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -693,7 +711,7 @@ function CalendarView({ user, calendarEvents, subjects }) {
 }
 
 // ==========================================
-// VIEW: HORARIOS Y DISPONIBILIDAD (RESTORED FULLY)
+// VIEW: HORARIOS Y DISPONIBILIDAD
 // ==========================================
 function ScheduleView({ user, scheduleItems, availabilityItems, subjects }) {
   const [subTab, setSubTab] = useState('classes'); 
@@ -702,7 +720,8 @@ function ScheduleView({ user, scheduleItems, availabilityItems, subjects }) {
   const [classFormData, setClassFormData] = useState({ subjectId: subjects[0].id, dayOfWeek: 'Lunes', startTime: '14:00', endTime: '16:00', classroom: '' });
   const [availFormData, setAvailFormData] = useState({ userName: user.displayName || '', dayOfWeek: 'Lunes', startTime: '16:00', endTime: '18:00' });
 
-  const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  // Solo de Lunes a Viernes
+  const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
   const handleAddSchedule = async (e) => {
     e.preventDefault();
@@ -762,10 +781,9 @@ function ScheduleView({ user, scheduleItems, availabilityItems, subjects }) {
         </form>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {DAYS.map(day => {
           const dayItems = (subTab === 'classes' ? scheduleItems : availabilityItems).filter(item => item.dayOfWeek === day).sort((a, b) => a.startTime.localeCompare(b.startTime));
-          if (dayItems.length === 0 && day === 'Sábado') return null; 
 
           return (
             <div key={day} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
@@ -859,21 +877,19 @@ function ChatView({ user, chatMessages }) {
 }
 
 // ==========================================
-// VIEW: ZONA DE CONCENTRACIÓN (AUDIO)
+// VIEW: ZONA DE CONCENTRACIÓN (AUDIO REDUCIDO)
 // ==========================================
 function FocusView({ activeStream, setActiveStream }) {
   const STREAMS = [
     { id: 'lofi-1', category: 'Lo-Fi', title: 'Lofi Girl (Beats)', desc: 'Beats relajantes para estudiar', url: 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1', color: 'bg-purple-100 text-purple-700' },
-    { id: 'lofi-2', category: 'Lo-Fi', title: 'Chillhop (Mix)', desc: 'Mix sin interrupciones', url: 'https://www.youtube.com/embed/n61ULEU7CO0?autoplay=1', color: 'bg-indigo-100 text-indigo-700' },
     { id: 'inst-1', category: 'Instrumental', title: 'Piano Clásico (3 Hs)', desc: 'Concentración profunda', url: 'https://www.youtube.com/embed/8MAJmEebX4A?autoplay=1', color: 'bg-blue-100 text-blue-700' },
-    { id: 'white-1', category: 'Ruido Blanco', title: 'Lluvia y Truenos', desc: 'Sonido ambiental constante', url: 'https://www.youtube.com/embed/mPZkdNFkNps?autoplay=1', color: 'bg-slate-200 text-slate-700' },
   ];
 
   return (
     <div className="max-w-4xl mx-auto text-center">
       <Headphones size={48} className="mx-auto text-teal-300 mb-4" />
       <h2 className="text-2xl font-bold text-slate-800 mb-8">Elige tu música de estudio</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
         {STREAMS.map(stream => (
           <button key={stream.id} onClick={() => setActiveStream(stream)}
             className={`p-4 rounded-xl border-2 text-left transition-all ${activeStream?.id === stream.id ? 'border-teal-500 bg-teal-50 shadow-md' : 'bg-white hover:border-teal-300 hover:shadow-sm'}`}>
