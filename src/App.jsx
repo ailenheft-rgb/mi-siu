@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Check, Lock, Unlock, GraduationCap, AlertCircle, Calendar, Folder, BookOpen, Plus, ExternalLink, Trash2, CalendarDays, Clock, Users, Headphones, PlayCircle, Radio, X, Save, FileText, LogOut, MessageSquare, Send } from 'lucide-react';
+import { Check, Lock, Unlock, GraduationCap, AlertCircle, Calendar, Folder, BookOpen, Plus, ExternalLink, Trash2, CalendarDays, Clock, Users, Headphones, PlayCircle, Radio, X, Save, FileText, LogOut, MessageSquare, Send, Trophy, XCircle, User } from 'lucide-react';
 
 // --- FIREBASE IMPORTS ---
 import { initializeApp } from 'firebase/app';
@@ -76,7 +76,7 @@ const INITIAL_SUBJECTS = [
 
   // AÑO 3 - Cuatrimestre 2
   { id: 'prod_av2', name: 'Producción audiovisual II', year: 3, semester: 2, prereqs: ['prod_av1'] },
-  { id: 'psico_org', name: 'Psicosociología de las organizations', year: 3, semester: 2, prereqs: [] },
+  { id: 'psico_org', name: 'Psicosociología de las organizaciones', year: 3, semester: 2, prereqs: [] },
   { id: 'dir_com', name: 'Dirección en comunicación', year: 3, semester: 2, prereqs: ['dir_est'] },
   { id: 'ident_visual', name: 'Identidad visual corporativa', year: 3, semester: 2, prereqs: ['diseno'] },
   { id: 'emprend', name: 'Emprendimiento', year: 3, semester: 2, prereqs: ['prop_pub'] },
@@ -199,7 +199,7 @@ export default function StudyPlanTracker() {
       setChatMessages(msgs);
     });
 
-    // G) Custom Streams (Música añadida por usuarios)
+    // G) Custom Streams
     const streamsRef = collection(db, 'artifacts', appId, 'public', 'data', 'streams');
     const unsubStreams = onSnapshot(streamsRef, (snapshot) => {
       const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -330,7 +330,14 @@ export default function StudyPlanTracker() {
                 </div>
                 <div>
                   <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white drop-shadow-sm leading-none">Comunidad Estudiantil</h1>
-                  <span className="text-teal-100 text-xs font-medium">Hola, {user.displayName?.split(' ')[0] || 'Estudiante'}</span>
+                  <span className="text-teal-100 text-xs font-medium flex items-center gap-2 mt-1">
+                    {user.photoURL ? (
+                      <img src={user.photoURL} alt="avatar" className="w-5 h-5 rounded-full border border-teal-200" />
+                    ) : (
+                      <User size={14} className="bg-teal-500 rounded-full p-0.5" />
+                    )}
+                    Hola, {user.displayName?.split(' ')[0] || 'Estudiante'}
+                  </span>
                 </div>
               </div>
               
@@ -388,8 +395,9 @@ export default function StudyPlanTracker() {
         )}
         {activeTab === 'vault' && <VaultView user={user} vaultItems={vaultItems} subjects={INITIAL_SUBJECTS} />}
         {activeTab === 'calendar' && <CalendarView user={user} calendarEvents={calendarEvents} subjects={INITIAL_SUBJECTS} />}
-        {activeTab === 'schedule' && <ScheduleView user={user} scheduleItems={scheduleItems} availabilityItems={availabilityItems} subjects={INITIAL_SUBJECTS} />}
-        {activeTab === 'chat' && <ChatView user={user} chatMessages={chatMessages} />}
+        {/* Pasamos subjectDetails a ScheduleView para que sepa qué materias estamos cursando */}
+        {activeTab === 'schedule' && <ScheduleView user={user} scheduleItems={scheduleItems} availabilityItems={availabilityItems} subjects={INITIAL_SUBJECTS} subjectDetails={subjectDetails} />}
+        {activeTab === 'chat' && <ChatView user={user} chatMessages={chatMessages} subjectDetails={subjectDetails} subjects={INITIAL_SUBJECTS} />}
         {activeTab === 'focus' && <FocusView user={user} activeStream={activeStream} setActiveStream={setActiveStream} customStreams={customStreams} />}
       </main>
 
@@ -441,21 +449,28 @@ function TabButton({ active, onClick, icon, label }) {
 function PlanView({ subjectsByGroup, completedSubjects, subjectDetails, getSubjectStatus, onSubjectClick }) {
   return (
     <>
+      {/* LEYENDA COLORES DEL BOCETO */}
       <div className="flex flex-wrap justify-center gap-3 mb-10 text-xs md:text-sm">
         <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-slate-200">
-          <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div><span className="font-medium text-slate-600">Aprobada</span>
+          <div className="w-3 h-3 rounded-full bg-emerald-600"></div><span className="font-bold text-slate-700">Promocionada</span>
         </div>
         <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-slate-200">
-          <div className="w-2.5 h-2.5 rounded-full bg-amber-400"></div><span className="font-medium text-slate-600">Regularizada</span>
+          <div className="w-3 h-3 rounded-full bg-green-400"></div><span className="font-bold text-slate-700">Aprobada</span>
         </div>
         <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-slate-200">
-          <div className="w-2.5 h-2.5 rounded-full bg-blue-400"></div><span className="font-medium text-slate-600">Cursando</span>
+          <div className="w-3 h-3 rounded-full bg-blue-500"></div><span className="font-bold text-slate-700">Regular</span>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-slate-200">
+          <div className="w-3 h-3 rounded-full bg-yellow-400"></div><span className="font-bold text-slate-700">Cursando</span>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-slate-200">
+          <div className="w-3 h-3 rounded-full bg-red-500"></div><span className="font-bold text-slate-700">Pérdida/Libre</span>
         </div>
         <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-teal-300 ring-2 ring-teal-50">
-          <div className="w-2.5 h-2.5 rounded-full bg-white border-2 border-teal-500"></div><span className="font-medium text-teal-700">Disponible</span>
+          <div className="w-3 h-3 rounded-full bg-white border-2 border-teal-500"></div><span className="font-bold text-teal-700">Disponible</span>
         </div>
         <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-slate-200 opacity-70">
-          <div className="w-2.5 h-2.5 rounded-full bg-slate-300"></div><span className="font-medium text-slate-500">Bloqueada</span>
+          <div className="w-3 h-3 rounded-full bg-slate-300"></div><span className="font-medium text-slate-500">Bloqueada</span>
         </div>
       </div>
 
@@ -498,7 +513,7 @@ function SubjectCardWrapper({ subject, subjectDetails, completedSubjects, onTogg
   const status = getSubjectStatus(subject);
   const detail = subjectDetails[subject.id];
   
-  // Calcular materias correlativas que faltan aprobar
+  // Calcular correlativas faltantes
   const missingPrereqsNames = subject.prereqs.filter(preId => {
     const preStatus = subjectDetails[preId]?.status;
     return !(completedSubjects.includes(preId) || ['aprobada', 'promocion', 'final'].includes(preStatus));
@@ -507,58 +522,72 @@ function SubjectCardWrapper({ subject, subjectDetails, completedSubjects, onTogg
   return <SubjectCard subject={subject} status={status} detail={detail} missingPrereqs={missingPrereqsNames} onToggle={() => onToggle(subject.id, status)} />;
 }
 
+// TARJETA DE MATERIA CON COLORES EXACTOS AL BOCETO
 function SubjectCard({ subject, status, detail, missingPrereqs, onToggle }) {
   const isLocked = status === 'locked';
-  const isAprobada = ['aprobada', 'promocion', 'final'].includes(status);
+  const isPromocion = status === 'promocion';
+  const isAprobada = status === 'aprobada' || status === 'final';
   const isRegular = status === 'regular';
   const isCursando = status === 'cursando';
+  const isPerdida = status === 'perdida';
   const isAvailable = status === 'available';
+
+  // Nota definitiva en AZUL
+  const finalGrade = detail?.gradePromocion || detail?.gradeFinal || detail?.grade;
 
   return (
     <div 
       onClick={onToggle}
       className={`
-        relative p-3 rounded-lg border transition-all duration-200 cursor-pointer select-none group flex flex-col h-full min-h-[100px] shadow-sm
+        relative p-3 rounded-xl border transition-all duration-200 cursor-pointer select-none group flex flex-col h-full min-h-[100px] shadow-sm
         ${isLocked ? 'bg-slate-50/50 border-slate-200 hover:bg-slate-100' : ''}
-        ${isAprobada ? 'bg-green-50 border-green-400/50 text-green-900' : ''}
-        ${isRegular ? 'bg-amber-50 border-amber-400/50 text-amber-900' : ''}
-        ${isCursando ? 'bg-blue-50 border-blue-400/50 text-blue-900' : ''}
+        ${isPromocion ? 'bg-emerald-600 border-emerald-700 text-white shadow-md' : ''}
+        ${isAprobada ? 'bg-green-100 border-green-400 text-green-900' : ''}
+        ${isRegular ? 'bg-blue-100 border-blue-400 text-blue-900' : ''}
+        ${isCursando ? 'bg-yellow-100 border-yellow-400 text-yellow-900' : ''}
+        ${isPerdida ? 'bg-red-100 border-red-400 text-red-900' : ''}
         ${isAvailable ? 'bg-white border-teal-300 ring-2 ring-teal-50 hover:ring-teal-100 hover:border-teal-400 shadow-md hover:-translate-y-0.5' : ''}
       `}
     >
       <div className="flex justify-between items-start gap-2 mb-1">
-        <h3 className={`font-semibold text-sm leading-snug ${isLocked ? 'text-slate-400' : 'text-slate-800'}`}>{subject.name}</h3>
+        <h3 className={`font-semibold text-sm leading-snug ${isLocked ? 'text-slate-400' : isPromocion ? 'text-white' : 'text-slate-800'}`}>{subject.name}</h3>
         <div className={`shrink-0 p-1 rounded-full transition-colors mt-0.5
+          ${isPromocion ? 'bg-white/20 text-white' : ''}
           ${isAprobada ? 'bg-green-500 text-white' : ''}
-          ${isRegular ? 'bg-amber-400 text-white' : ''}
-          ${isCursando ? 'bg-blue-500 text-white' : ''}
+          ${isRegular ? 'bg-blue-500 text-white' : ''}
+          ${isCursando ? 'bg-yellow-400 text-white' : ''}
+          ${isPerdida ? 'bg-red-500 text-white' : ''}
           ${isAvailable ? 'bg-teal-100 text-teal-600' : ''}
           ${isLocked ? 'text-slate-300' : ''}
         `}>
+          {isPromocion && <Trophy size={14} strokeWidth={2.5} />}
           {isAprobada && <Check size={14} strokeWidth={3} />}
           {isRegular && <FileText size={14} strokeWidth={2} />}
           {isCursando && <BookOpen size={14} strokeWidth={2} />}
+          {isPerdida && <XCircle size={14} strokeWidth={2} />}
           {isAvailable && <Unlock size={14} />}
           {isLocked && <Lock size={14} />}
         </div>
       </div>
 
-      {status === 'regular' && detail?.gradeCursada && <div className="mt-1 text-xs font-bold text-amber-700 bg-amber-100/50 w-fit px-2 py-0.5 rounded">Cursada: {detail.gradeCursada}</div>}
-      {status === 'promocion' && (detail?.gradePromocion || detail?.grade) && <div className="mt-1 text-xs font-bold text-green-700 bg-green-100/50 w-fit px-2 py-0.5 rounded">Promoción: {detail.gradePromocion || detail.grade}</div>}
-      {status === 'final' && (detail?.gradeCursada || detail?.gradeFinal) && (
-        <div className="mt-1 text-[11px] font-bold text-green-700 bg-green-100/50 w-fit px-2 py-0.5 rounded flex gap-2">
-          {detail.gradeCursada && <span>Cursada: {detail.gradeCursada}</span>}
-          {detail.gradeFinal && <span>Final: {detail.gradeFinal}</span>}
-        </div>
-      )}
-      {status === 'aprobada' && detail?.grade && <div className="mt-1 text-xs font-bold text-green-700 bg-green-100/50 w-fit px-2 py-0.5 rounded">Nota: {detail.grade}</div>}
+      {/* DETALLES DE NOTAS */}
+      <div className="mt-2 space-y-1">
+        {(isRegular || isAprobada) && detail?.gradeCursada && (
+          <div className={`text-[10px] font-bold px-2 py-0.5 rounded w-fit ${isPromocion ? 'bg-white/20 text-emerald-50' : 'bg-white/50 text-slate-600'}`}>Cursada: {detail.gradeCursada}</div>
+        )}
+        
+        {/* NOTA DEFINITIVA EN AZUL CLARO (o blanco si el fondo es oscuro) */}
+        {finalGrade && (
+          <div className={`text-xs font-black px-2 py-0.5 rounded w-fit uppercase tracking-wide border ${isPromocion ? 'bg-white text-emerald-700 border-emerald-200' : 'bg-blue-50 text-blue-600 border-blue-200'}`}>
+            Definitiva: {finalGrade}
+          </div>
+        )}
+      </div>
       
-      {/* Mostrar correlativas faltantes si está bloqueada */}
       {isLocked && missingPrereqs && missingPrereqs.length > 0 && (
         <div className="mt-auto pt-2">
           <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-red-400 mb-0.5">
-            <AlertCircle size={10} />
-            <span>Falta correlativa</span>
+            <AlertCircle size={10} /><span>Falta correlativa</span>
           </div>
           <p className="text-[10px] text-slate-500 leading-tight">
             {missingPrereqs[0]} {missingPrereqs.length > 1 && `+ ${missingPrereqs.length - 1} más`}
@@ -570,54 +599,97 @@ function SubjectCard({ subject, status, detail, missingPrereqs, onToggle }) {
 }
 
 // ==========================================
-// MODAL DETALLES DE MATERIA
+// MODAL DETALLES DE MATERIA (COMPLETO DEL BOCETO)
 // ==========================================
 function SubjectDetailsModal({ subject, currentDetails, onSave, onClose }) {
   const [formData, setFormData] = useState({
     status: currentDetails.status || 'pendiente',
-    scheduleDays: currentDetails.scheduleDays || '',
-    hours: currentDetails.hours || '',
     gradeCursada: currentDetails.gradeCursada || '',
     gradeFinal: currentDetails.gradeFinal || '',
-    gradePromocion: currentDetails.gradePromocion || currentDetails.grade || ''
+    gradePromocion: currentDetails.gradePromocion || currentDetails.grade || '',
+    profesorName: currentDetails.profesorName || '',
+    profesorContact: currentDetails.profesorContact || '',
+    aula: currentDetails.aula || '',
+    creditos: currentDetails.creditos || ''
   });
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
-        <div className="bg-gradient-to-r from-teal-600 to-emerald-600 px-6 py-4 flex justify-between items-center text-white shrink-0">
-          <div><span className="text-teal-100 text-xs font-bold uppercase tracking-wider block">Registro de Cursada</span><h2 className="text-lg font-bold pr-4">{subject.name}</h2></div>
-          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full"><X size={20} /></button>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="bg-gradient-to-r from-teal-600 to-emerald-600 px-6 py-4 flex justify-between items-center text-white shrink-0 shadow-sm">
+          <div><span className="text-teal-100 text-xs font-bold uppercase tracking-wider block">Ficha de la Materia</span><h2 className="text-lg font-bold pr-4">{subject.name}</h2></div>
+          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
         </div>
-        <div className="p-6 overflow-y-auto">
-          <form id="subject-form" onSubmit={(e) => { e.preventDefault(); onSave(formData); }} className="space-y-5">
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-              <label className="block text-sm font-bold text-slate-700 mb-2">Estado de la Materia</label>
-              <select className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
-                <option value="pendiente">Pendiente (Disponible)</option>
-                <option value="cursando">📖 Cursando actualmente</option>
-                <option value="regular">📝 Regularizada (Falta final)</option>
-                <option value="promocion">🏆 Aprobada por Promoción</option>
-                <option value="final">🎓 Aprobada con Examen Final</option>
-              </select>
+        
+        <div className="p-6 overflow-y-auto bg-slate-50">
+          <form id="subject-form" onSubmit={(e) => { e.preventDefault(); onSave(formData); }} className="space-y-6">
+            
+            {/* SECCIÓN 1: ESTADO Y NOTAS */}
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+              <h3 className="text-xs font-bold text-teal-600 uppercase tracking-wider mb-3 border-b pb-2">Progreso Académico</h3>
+              <div className="mb-4">
+                <label className="block text-sm font-bold text-slate-700 mb-2">Estado Actual</label>
+                <select className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 font-medium text-slate-700" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
+                  <option value="pendiente">⚪ Pendiente (Disponible)</option>
+                  <option value="cursando">🟡 Cursando actualmente</option>
+                  <option value="regular">🔵 Regularizada (Falta final)</option>
+                  <option value="promocion">🌲 Aprobada por Promoción (8 o más)</option>
+                  <option value="final">🟢 Aprobada con Examen Final</option>
+                  <option value="perdida">🔴 Pérdida / Libre</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {(formData.status === 'regular' || formData.status === 'final') && (
+                  <div className={formData.status === 'regular' ? 'sm:col-span-2' : ''}>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Nota Cursada</label>
+                    <input type="number" min="1" max="10" className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 bg-slate-50" value={formData.gradeCursada} onChange={e => setFormData({...formData, gradeCursada: e.target.value})} />
+                  </div>
+                )}
+                {formData.status === 'final' && (
+                  <div>
+                    <label className="block text-sm font-bold text-blue-600 mb-1">Nota Definitiva (Final)</label>
+                    <input type="number" min="1" max="10" className="w-full px-3 py-2 border-2 border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 bg-blue-50 font-bold" value={formData.gradeFinal} onChange={e => setFormData({...formData, gradeFinal: e.target.value})} />
+                  </div>
+                )}
+                {(formData.status === 'promocion' || formData.status === 'aprobada') && (
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-bold text-blue-600 mb-1">Nota Definitiva (Promoción)</label>
+                    <input type="number" min="1" max="10" className="w-full px-3 py-2 border-2 border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 bg-blue-50 font-bold" value={formData.gradePromocion} onChange={e => setFormData({...formData, gradePromocion: e.target.value})} />
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {(formData.status === 'regular' || formData.status === 'final') && (
-                <div className={formData.status === 'regular' ? 'md:col-span-2' : ''}>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Nota Cursada</label>
-                  <input type="number" min="1" max="10" className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500" value={formData.gradeCursada} onChange={e => setFormData({...formData, gradeCursada: e.target.value})} />
+
+            {/* SECCIÓN 2: INFO DE LA MATERIA (DEL BOCETO) */}
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+              <h3 className="text-xs font-bold text-teal-600 uppercase tracking-wider mb-3 border-b pb-2">Información del Profesor y Cursada</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Profesor/a (Nombre)</label>
+                  <input type="text" placeholder="Ej: Lic. María González" className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 bg-slate-50" value={formData.profesorName} onChange={e => setFormData({...formData, profesorName: e.target.value})} />
                 </div>
-              )}
-              {formData.status === 'final' && (
-                <div><label className="block text-sm font-medium text-slate-700 mb-1">Nota Final</label><input type="number" min="1" max="10" className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500" value={formData.gradeFinal} onChange={e => setFormData({...formData, gradeFinal: e.target.value})} /></div>
-              )}
-              {(formData.status === 'promocion' || formData.status === 'aprobada') && (
-                <div className="md:col-span-2"><label className="block text-sm font-medium text-slate-700 mb-1">Nota Promoción</label><input type="number" min="1" max="10" className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500" value={formData.gradePromocion} onChange={e => setFormData({...formData, gradePromocion: e.target.value})} /></div>
-              )}
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Teléfono / Correo / Link</label>
+                  <input type="text" placeholder="Correo o link al campus" className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 bg-slate-50" value={formData.profesorContact} onChange={e => setFormData({...formData, profesorContact: e.target.value})} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Créditos / Horas</label>
+                  <input type="text" placeholder="Ej: 4 Créditos" className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 bg-slate-50" value={formData.creditos} onChange={e => setFormData({...formData, creditos: e.target.value})} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Aula Física/Virtual</label>
+                  <input type="text" placeholder="Ej: Aula 5 / Zoom" className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 bg-slate-50" value={formData.aula} onChange={e => setFormData({...formData, aula: e.target.value})} />
+                </div>
+              </div>
             </div>
+
           </form>
         </div>
-        <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3"><button onClick={onClose} className="px-4 py-2 font-medium hover:bg-slate-200 rounded-lg text-slate-700">Cancelar</button><button type="submit" form="subject-form" className="px-6 py-2 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700">Guardar</button></div>
+        <div className="p-4 border-t border-slate-200 bg-white flex justify-end gap-3 shrink-0">
+          <button onClick={onClose} className="px-5 py-2 font-medium hover:bg-slate-100 rounded-lg text-slate-600 transition-colors">Cancelar</button>
+          <button type="submit" form="subject-form" className="px-6 py-2 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-700 transition-colors flex items-center gap-2"><Save size={18}/> Guardar Ficha</button>
+        </div>
       </div>
     </div>
   );
@@ -665,7 +737,7 @@ function VaultView({ user, vaultItems, subjects }) {
 }
 
 // ==========================================
-// VIEW: CALENDARIO COMPARTIDO
+// VIEW: CALENDARIO COMPARTIDO (CON EXPOSICIONES)
 // ==========================================
 function CalendarView({ user, calendarEvents, subjects }) {
   const [showForm, setShowForm] = useState(false);
@@ -724,17 +796,31 @@ function CalendarView({ user, calendarEvents, subjects }) {
 }
 
 // ==========================================
-// VIEW: HORARIOS Y DISPONIBILIDAD
+// VIEW: HORARIOS Y DISPONIBILIDAD (PERSONALIZADOS)
 // ==========================================
-function ScheduleView({ user, scheduleItems, availabilityItems, subjects }) {
+function ScheduleView({ user, scheduleItems, availabilityItems, subjects, subjectDetails }) {
   const [subTab, setSubTab] = useState('classes'); 
   const [showForm, setShowForm] = useState(false);
+  const [groupFilter, setGroupFilter] = useState(''); // Nuevo filtro de búsqueda para grupos
   
   const [classFormData, setClassFormData] = useState({ subjectId: subjects[0].id, dayOfWeek: 'Lunes', startTime: '14:00', endTime: '16:00', classroom: '' });
-  const [availFormData, setAvailFormData] = useState({ userName: user.displayName || '', dayOfWeek: 'Lunes', startTime: '16:00', endTime: '18:00' });
+  const [availFormData, setAvailFormData] = useState({ userName: user.displayName || '', groupName: '', dayOfWeek: 'Lunes', startTime: '16:00', endTime: '18:00' });
 
   // Solo de Lunes a Viernes
   const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+
+  // FILTRO 1: Mis Materias
+  // Revisa la base de datos general y devuelve SOLO los horarios de las materias que marco como "Cursando"
+  const myClassItems = useMemo(() => {
+    return scheduleItems.filter(item => subjectDetails[item.subjectId]?.status === 'cursando');
+  }, [scheduleItems, subjectDetails]);
+
+  // FILTRO 2: Mi Grupo de TP
+  // Si hay algo escrito en el buscador, muestra solo los horarios de ese grupo específico
+  const myGroupItems = useMemo(() => {
+    if (!groupFilter.trim()) return availabilityItems;
+    return availabilityItems.filter(item => item.groupName?.toLowerCase() === groupFilter.trim().toLowerCase());
+  }, [availabilityItems, groupFilter]);
 
   const handleAddSchedule = async (e) => {
     e.preventDefault();
@@ -745,7 +831,7 @@ function ScheduleView({ user, scheduleItems, availabilityItems, subjects }) {
 
   const handleAddAvailability = async (e) => {
     e.preventDefault();
-    if (!availFormData.startTime || !availFormData.endTime || !availFormData.userName) return;
+    if (!availFormData.startTime || !availFormData.endTime || !availFormData.userName || !availFormData.groupName) return;
     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'availability'), { ...availFormData, authorId: user.uid, createdAt: Date.now() });
     setShowForm(false);
   };
@@ -759,50 +845,79 @@ function ScheduleView({ user, scheduleItems, availabilityItems, subjects }) {
     <div className="max-w-6xl mx-auto animate-in fade-in duration-500">
       <div className="flex justify-center mb-8">
         <div className="bg-slate-200 p-1 rounded-xl inline-flex shadow-inner">
-          <button onClick={() => { setSubTab('classes'); setShowForm(false); }} className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${subTab === 'classes' ? 'bg-white text-teal-700 shadow' : 'text-slate-600 hover:text-slate-800'}`}><Clock size={16} /> Horarios de Clases</button>
-          <button onClick={() => { setSubTab('availability'); setShowForm(false); }} className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${subTab === 'availability' ? 'bg-white text-green-700 shadow' : 'text-slate-600 hover:text-slate-800'}`}><Users size={16} /> Disponibilidad (TPs)</button>
+          <button onClick={() => { setSubTab('classes'); setShowForm(false); }} className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${subTab === 'classes' ? 'bg-white text-teal-700 shadow' : 'text-slate-600 hover:text-slate-800'}`}><Clock size={16} /> Mis Horarios de Cursada</button>
+          <button onClick={() => { setSubTab('availability'); setShowForm(false); }} className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${subTab === 'availability' ? 'bg-white text-green-700 shadow' : 'text-slate-600 hover:text-slate-800'}`}><Users size={16} /> Disponibilidad de Grupos</button>
         </div>
       </div>
 
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">{subTab === 'classes' ? 'Horarios de Cursada' : 'Disponibilidad para Trabajos'}</h2>
+          <h2 className="text-2xl font-bold text-slate-800">{subTab === 'classes' ? 'Mis Horarios de Cursada' : 'Disponibilidad para Trabajos'}</h2>
+          <p className="text-sm text-slate-500 mt-1">
+            {subTab === 'classes' 
+              ? 'Aquí verás exclusivamente los horarios de las materias que tienes marcadas como "Cursando".' 
+              : 'Escribe el nombre de tu grupo para ver cuándo pueden juntarse a hacer TPs.'}
+          </p>
         </div>
-        <button onClick={() => setShowForm(!showForm)} className={`${subTab === 'classes' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-green-600 hover:bg-green-700'} text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors`}><Plus size={18}/> Agregar</button>
+        
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          {/* BUSCADOR DE GRUPOS */}
+          {subTab === 'availability' && !showForm && (
+            <div className="relative flex-1 sm:w-64">
+              <Users size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input 
+                type="text" placeholder="Ej: Grupo Los Pumas" 
+                className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none text-sm font-medium"
+                value={groupFilter} onChange={e => setGroupFilter(e.target.value)}
+              />
+            </div>
+          )}
+          <button onClick={() => setShowForm(!showForm)} className={`shrink-0 ${subTab === 'classes' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-green-600 hover:bg-green-700'} text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm`}>
+            {showForm ? <X size={18}/> : <Plus size={18}/>} 
+            <span className="hidden sm:inline">{showForm ? 'Cancelar' : 'Agregar'}</span>
+          </button>
+        </div>
       </div>
 
       {showForm && subTab === 'classes' && (
         <form onSubmit={handleAddSchedule} className="bg-white p-5 rounded-xl shadow-md border border-slate-200 mb-8 border-t-4 border-t-teal-500">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="md:col-span-3"><label className="block text-sm font-medium mb-1">Materia</label><select className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-teal-500" value={classFormData.subjectId} onChange={e => setClassFormData({...classFormData, subjectId: e.target.value})}>{subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select></div>
+            <div className="md:col-span-3">
+              <label className="block text-sm font-medium mb-1">Materia (Cargar horario general)</label>
+              <select className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-teal-500" value={classFormData.subjectId} onChange={e => setClassFormData({...classFormData, subjectId: e.target.value})}>{subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
+            </div>
             <div><label className="block text-sm font-medium mb-1">Día</label><select className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-teal-500" value={classFormData.dayOfWeek} onChange={e => setClassFormData({...classFormData, dayOfWeek: e.target.value})}>{DAYS.map(d => <option key={d} value={d}>{d}</option>)}</select></div>
             <div><label className="block text-sm font-medium mb-1">Desde - Hasta</label><div className="flex items-center gap-2"><input type="time" required className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-teal-500" value={classFormData.startTime} onChange={e => setClassFormData({...classFormData, startTime: e.target.value})}/><span>-</span><input type="time" required className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-teal-500" value={classFormData.endTime} onChange={e => setClassFormData({...classFormData, endTime: e.target.value})}/></div></div>
             <div><label className="block text-sm font-medium mb-1">Aula</label><input type="text" placeholder="Ej: Aula 5" className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-teal-500" value={classFormData.classroom} onChange={e => setClassFormData({...classFormData, classroom: e.target.value})}/></div>
           </div>
-          <button type="submit" className="w-full bg-teal-50 text-teal-700 font-bold py-2 rounded-lg">Guardar Clase</button>
+          <button type="submit" className="w-full bg-teal-50 text-teal-700 font-bold py-2 rounded-lg">Cargar Clase al Sistema</button>
         </form>
       )}
 
       {showForm && subTab === 'availability' && (
         <form onSubmit={handleAddAvailability} className="bg-white p-5 rounded-xl shadow-md border border-slate-200 mb-8 border-t-4 border-t-green-500">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="md:col-span-3"><label className="block text-sm font-medium mb-1">Nombre</label><input type="text" required placeholder="Tu Nombre" className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" value={availFormData.userName} onChange={e => setAvailFormData({...availFormData, userName: e.target.value})}/></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div><label className="block text-sm font-medium mb-1">Tu Nombre</label><input type="text" required placeholder="Tu Nombre" className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" value={availFormData.userName} onChange={e => setAvailFormData({...availFormData, userName: e.target.value})}/></div>
+            <div><label className="block text-sm font-medium mb-1">Nombre de tu Grupo (Exacto)</label><input type="text" required placeholder="Ej: Grupo Los Pumas" className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" value={availFormData.groupName} onChange={e => setAvailFormData({...availFormData, groupName: e.target.value})}/></div>
             <div><label className="block text-sm font-medium mb-1">Día Libre</label><select className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" value={availFormData.dayOfWeek} onChange={e => setAvailFormData({...availFormData, dayOfWeek: e.target.value})}>{DAYS.map(d => <option key={d} value={d}>{d}</option>)}</select></div>
             <div><label className="block text-sm font-medium mb-1">Desde - Hasta</label><div className="flex items-center gap-2"><input type="time" required className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" value={availFormData.startTime} onChange={e => setAvailFormData({...availFormData, startTime: e.target.value})}/><span>-</span><input type="time" required className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" value={availFormData.endTime} onChange={e => setAvailFormData({...availFormData, endTime: e.target.value})}/></div></div>
           </div>
-          <button type="submit" className="w-full bg-green-50 text-green-700 font-bold py-2 rounded-lg">Publicar Disponibilidad</button>
+          <button type="submit" className="w-full bg-green-50 text-green-700 font-bold py-2 rounded-lg">Publicar mi Disponibilidad</button>
         </form>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {DAYS.map(day => {
-          const dayItems = (subTab === 'classes' ? scheduleItems : availabilityItems).filter(item => item.dayOfWeek === day).sort((a, b) => a.startTime.localeCompare(b.startTime));
+          // Usamos nuestras nuevas listas filtradas en lugar de las globales
+          const dayItems = (subTab === 'classes' ? myClassItems : myGroupItems)
+            .filter(item => item.dayOfWeek === day)
+            .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
           return (
-            <div key={day} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+            <div key={day} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col min-h-[150px]">
               <div className={`${subTab === 'classes' ? 'bg-slate-100' : 'bg-green-50'} py-2 text-center border-b border-slate-200`}><h3 className={`font-bold uppercase text-sm tracking-wider ${subTab === 'classes' ? 'text-slate-700' : 'text-green-800'}`}>{day}</h3></div>
               <div className="p-3 flex-1 bg-slate-50/50 space-y-3">
-                {dayItems.length === 0 ? <p className="text-center text-xs text-slate-400 py-4 italic">Vacío</p> : dayItems.map(item => {
+                {dayItems.length === 0 ? <p className="text-center text-xs text-slate-400 py-4 italic">Libre</p> : dayItems.map(item => {
                   const isOwner = user?.uid === item.authorId;
                   if (subTab === 'classes') {
                     const subject = subjects.find(s => s.id === item.subjectId);
@@ -820,7 +935,7 @@ function ScheduleView({ user, scheduleItems, availabilityItems, subjects }) {
                         {isOwner && <button onClick={() => handleDelete(item.id, item.authorId, 'availability')} className="absolute top-2 right-2 text-slate-300 hover:text-red-500"><Trash2 size={14} /></button>}
                         <div className="text-xs font-bold text-green-700 mb-1 flex items-center gap-1"><Clock size={12} /> {item.startTime} - {item.endTime}</div>
                         <h4 className="text-sm font-semibold text-slate-800 flex items-center gap-1"><Users size={14} className="text-slate-400"/> {item.userName}</h4>
-                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mt-1">Libre para TP</p>
+                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mt-1 break-words">Grupo: {item.groupName}</p>
                       </div>
                     );
                   }
@@ -835,20 +950,43 @@ function ScheduleView({ user, scheduleItems, availabilityItems, subjects }) {
 }
 
 // ==========================================
-// VIEW: CHAT EN VIVO
+// VIEW: CHAT EN VIVO (POR MATERIA)
 // ==========================================
-function ChatView({ user, chatMessages }) {
+function ChatView({ user, chatMessages, subjectDetails, subjects }) {
   const [msg, setMsg] = useState('');
   const messagesEndRef = useRef(null);
 
+  // Obtener las materias que el usuario marcó como "Cursando"
+  const cursandoSubjects = useMemo(() => {
+    return subjects.filter(s => subjectDetails[s.id]?.status === 'cursando');
+  }, [subjectDetails, subjects]);
+
+  // Estado para saber qué sala está abierta (por defecto la primera que cursa)
+  const [activeRoom, setActiveRoom] = useState(cursandoSubjects.length > 0 ? cursandoSubjects[0].id : null);
+
+  // Si cambia la lista de cursando, asegurar que haya una sala activa
+  useEffect(() => {
+    if (cursandoSubjects.length > 0 && !cursandoSubjects.find(s => s.id === activeRoom)) {
+      setActiveRoom(cursandoSubjects[0].id);
+    } else if (cursandoSubjects.length === 0) {
+      setActiveRoom(null);
+    }
+  }, [cursandoSubjects]);
+
+  // Filtrar los mensajes globales para mostrar solo los de la materia activa
+  const currentMessages = useMemo(() => {
+    return chatMessages.filter(m => m.subjectId === activeRoom);
+  }, [chatMessages, activeRoom]);
+
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  useEffect(() => scrollToBottom(), [chatMessages]);
+  useEffect(() => scrollToBottom(), [currentMessages]);
 
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!msg.trim()) return;
+    if (!msg.trim() || !activeRoom) return;
     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'chat'), {
       text: msg,
+      subjectId: activeRoom, // Guardamos a qué materia pertenece el mensaje
       authorId: user.uid,
       authorName: user.displayName || 'Estudiante',
       timestamp: Date.now()
@@ -856,41 +994,77 @@ function ChatView({ user, chatMessages }) {
     setMsg('');
   };
 
-  return (
-    <div className="max-w-3xl mx-auto h-[600px] flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-      <div className="bg-teal-600 p-4 text-white flex items-center gap-2 shadow-md z-10">
-        <MessageSquare size={20} /> <h2 className="font-bold">Sala de Chat Comunitaria</h2>
+  // Pantalla de bloqueo si no está cursando nada
+  if (cursandoSubjects.length === 0) {
+    return (
+      <div className="max-w-3xl mx-auto h-[600px] flex flex-col items-center justify-center bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
+        <Users size={64} className="text-slate-300 mb-4" />
+        <h2 className="text-2xl font-bold text-slate-700 mb-2">Salas de Chat Bloqueadas</h2>
+        <p className="text-slate-500">No estás cursando ninguna materia en este momento. Ve a "Mi Plan de Estudios" y marca una o más materias como <span className="font-bold text-yellow-600">"Cursando actualmente"</span> para unirte a sus grupos de chat.</p>
       </div>
+    );
+  }
+
+  return (
+    <div className="max-w-5xl mx-auto h-[600px] flex bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
       
-      <div className="flex-1 overflow-y-auto p-4 bg-slate-50 flex flex-col gap-3">
-        {chatMessages.length === 0 && <div className="text-center mt-20 text-slate-400">No hay mensajes aún. ¡Di hola!</div>}
-        {chatMessages.map(m => {
-          const isMe = m.authorId === user.uid;
-          return (
-            <div key={m.id} className={`flex flex-col max-w-[80%] ${isMe ? 'self-end items-end' : 'self-start items-start'}`}>
-              <span className="text-[10px] text-slate-400 mb-0.5 px-1 font-medium">{m.authorName}</span>
-              <div className={`px-4 py-2 rounded-2xl ${isMe ? 'bg-teal-500 text-white rounded-tr-none' : 'bg-white border shadow-sm rounded-tl-none text-slate-700'}`}>
-                {m.text}
-              </div>
-            </div>
-          );
-        })}
-        <div ref={messagesEndRef} />
+      {/* SIDEBAR DE MATERIAS */}
+      <div className="w-1/3 sm:w-1/4 border-r border-slate-200 bg-slate-50 flex flex-col">
+        <div className="bg-teal-700 p-4 text-white shadow-sm z-10 flex items-center gap-2">
+          <Users size={18} />
+          <h2 className="font-bold text-sm">Tus Grupos</h2>
+        </div>
+        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+          {cursandoSubjects.map(sub => (
+            <button 
+              key={sub.id}
+              onClick={() => setActiveRoom(sub.id)}
+              className={`w-full text-left p-3 rounded-lg text-sm font-medium transition-colors ${activeRoom === sub.id ? 'bg-teal-100 text-teal-800 shadow-sm border border-teal-200' : 'text-slate-600 hover:bg-slate-200 border border-transparent'}`}
+            >
+              <div className="line-clamp-2 leading-tight">{sub.name}</div>
+            </button>
+          ))}
+        </div>
       </div>
 
-      <form onSubmit={handleSend} className="p-3 bg-white border-t flex gap-2">
-        <input 
-          type="text" value={msg} onChange={e => setMsg(e.target.value)} placeholder="Escribe un mensaje..."
-          className="flex-1 border-slate-300 border rounded-full px-4 py-2 outline-none focus:border-teal-500" 
-        />
-        <button type="submit" className="bg-teal-500 hover:bg-teal-600 text-white p-3 rounded-full transition-colors"><Send size={18}/></button>
-      </form>
+      {/* ÁREA DE MENSAJES */}
+      <div className="w-2/3 sm:w-3/4 flex flex-col bg-white">
+        <div className="bg-teal-600 p-4 text-white flex items-center gap-2 shadow-md z-10">
+          <MessageSquare size={20} /> 
+          <h2 className="font-bold truncate">{subjects.find(s => s.id === activeRoom)?.name}</h2>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-4 bg-slate-50/50 flex flex-col gap-3">
+          {currentMessages.length === 0 && <div className="text-center mt-20 text-slate-400">No hay mensajes en esta materia aún. ¡Rompe el hielo y di hola!</div>}
+          {currentMessages.map(m => {
+            const isMe = m.authorId === user.uid;
+            return (
+              <div key={m.id} className={`flex flex-col max-w-[85%] ${isMe ? 'self-end items-end' : 'self-start items-start'}`}>
+                <span className="text-[10px] text-slate-400 mb-0.5 px-1 font-medium">{m.authorName}</span>
+                <div className={`px-4 py-2 rounded-2xl ${isMe ? 'bg-teal-500 text-white rounded-tr-none' : 'bg-white border shadow-sm rounded-tl-none text-slate-700'}`}>
+                  {m.text}
+                </div>
+              </div>
+            );
+          })}
+          <div ref={messagesEndRef} />
+        </div>
+
+        <form onSubmit={handleSend} className="p-3 bg-white border-t flex gap-2">
+          <input 
+            type="text" value={msg} onChange={e => setMsg(e.target.value)} placeholder="Escribe un mensaje al grupo..."
+            className="flex-1 border-slate-300 border rounded-full px-4 py-2 outline-none focus:border-teal-500" 
+          />
+          <button type="submit" className="bg-teal-500 hover:bg-teal-600 text-white p-3 rounded-full transition-colors"><Send size={18}/></button>
+        </form>
+      </div>
+
     </div>
   );
 }
 
 // ==========================================
-// VIEW: ZONA DE CONCENTRACIÓN (AUDIO REDUCIDO)
+// VIEW: ZONA DE CONCENTRACIÓN (YOUTUBE)
 // ==========================================
 function FocusView({ user, activeStream, setActiveStream, customStreams }) {
   const [showForm, setShowForm] = useState(false);
@@ -906,12 +1080,10 @@ function FocusView({ user, activeStream, setActiveStream, customStreams }) {
     if (!streamData.title || !streamData.url) return;
     
     let embedUrl = streamData.url;
-    // Convierte el enlace normal de YouTube en formato iframe (embed)
+    // Convierte enlace de YT a formato iframe
     if (embedUrl.includes('youtube.com/watch') || embedUrl.includes('youtu.be/')) {
       const videoId = embedUrl.split('v=')[1]?.split('&')[0] || embedUrl.split('youtu.be/')[1]?.split('?')[0];
-      if (videoId) {
-        embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-      }
+      if (videoId) embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
     }
 
     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'streams'), {
@@ -923,9 +1095,7 @@ function FocusView({ user, activeStream, setActiveStream, customStreams }) {
       authorId: user.uid,
       createdAt: Date.now()
     });
-    
-    setStreamData({ title: '', url: '' });
-    setShowForm(false);
+    setStreamData({ title: '', url: '' }); setShowForm(false);
   };
 
   const handleDeleteStream = async (id, authorId) => {
@@ -948,29 +1118,19 @@ function FocusView({ user, activeStream, setActiveStream, customStreams }) {
 
       {showForm && (
         <form onSubmit={handleAddStream} className="bg-white p-5 rounded-xl border border-teal-200 mb-8 grid grid-cols-1 md:grid-cols-2 gap-4 shadow-md max-w-2xl mx-auto text-left">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Nombre de la Playlist</label>
-            <input required placeholder="Ej: Rock instrumental" className="w-full border border-slate-300 p-2.5 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" value={streamData.title} onChange={e => setStreamData({...streamData, title: e.target.value})} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Enlace de YouTube</label>
-            <input required placeholder="https://www.youtube.com/watch?v=..." className="w-full border border-slate-300 p-2.5 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" value={streamData.url} onChange={e => setStreamData({...streamData, url: e.target.value})} />
-          </div>
+          <div><label className="block text-sm font-medium text-slate-700 mb-1">Nombre de la Playlist</label><input required placeholder="Ej: Rock instrumental" className="w-full border border-slate-300 p-2.5 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" value={streamData.title} onChange={e => setStreamData({...streamData, title: e.target.value})} /></div>
+          <div><label className="block text-sm font-medium text-slate-700 mb-1">Enlace de YouTube</label><input required placeholder="https://www.youtube.com/watch?v=..." className="w-full border border-slate-300 p-2.5 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" value={streamData.url} onChange={e => setStreamData({...streamData, url: e.target.value})} /></div>
           <button type="submit" className="md:col-span-2 bg-teal-50 text-teal-700 font-bold py-2.5 rounded-lg hover:bg-teal-100 transition-colors border border-teal-100">Compartir con la comunidad</button>
         </form>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
         {[...STREAMS, ...customStreams].map(stream => {
-          const isCustom = stream.authorId;
-          const isOwner = isCustom && user.uid === stream.authorId;
-          
+          const isOwner = stream.authorId && user.uid === stream.authorId;
           return (
             <div key={stream.id} className="relative group">
               {isOwner && (
-                <button onClick={(e) => { e.stopPropagation(); handleDeleteStream(stream.id, stream.authorId); }} className="absolute top-2 right-2 p-1.5 bg-white rounded-full text-slate-300 hover:text-red-500 hover:bg-red-50 shadow-sm z-10 opacity-0 group-hover:opacity-100 transition-all border border-slate-200" title="Eliminar Playlist">
-                  <Trash2 size={14} />
-                </button>
+                <button onClick={(e) => { e.stopPropagation(); handleDeleteStream(stream.id, stream.authorId); }} className="absolute top-2 right-2 p-1.5 bg-white rounded-full text-slate-300 hover:text-red-500 hover:bg-red-50 shadow-sm z-10 opacity-0 group-hover:opacity-100 transition-all border border-slate-200"><Trash2 size={14} /></button>
               )}
               <button onClick={() => setActiveStream(stream)}
                 className={`w-full h-full p-4 rounded-xl border-2 text-left transition-all flex flex-col ${activeStream?.id === stream.id ? 'border-teal-500 bg-teal-50 shadow-md ring-2 ring-teal-100' : 'bg-white hover:border-teal-300 hover:shadow-sm border-slate-200'}`}>
