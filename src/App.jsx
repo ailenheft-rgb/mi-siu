@@ -394,8 +394,8 @@ export default function StudyPlanTracker() {
           />
         )}
         {activeTab === 'vault' && <VaultView user={user} vaultItems={vaultItems} subjects={INITIAL_SUBJECTS} />}
-        {activeTab === 'calendar' && <CalendarView user={user} calendarEvents={calendarEvents} subjects={INITIAL_SUBJECTS} />}
-        {/* Pasamos subjectDetails a ScheduleView para que sepa qué materias estamos cursando */}
+        {/* Le pasamos subjectDetails al Calendario para que sepa qué estamos cursando */}
+        {activeTab === 'calendar' && <CalendarView user={user} calendarEvents={calendarEvents} subjects={INITIAL_SUBJECTS} subjectDetails={subjectDetails} />}
         {activeTab === 'schedule' && <ScheduleView user={user} scheduleItems={scheduleItems} availabilityItems={availabilityItems} subjects={INITIAL_SUBJECTS} subjectDetails={subjectDetails} />}
         {activeTab === 'chat' && <ChatView user={user} chatMessages={chatMessages} subjectDetails={subjectDetails} subjects={INITIAL_SUBJECTS} />}
         {activeTab === 'focus' && <FocusView user={user} activeStream={activeStream} setActiveStream={setActiveStream} customStreams={customStreams} />}
@@ -737,9 +737,10 @@ function VaultView({ user, vaultItems, subjects }) {
 }
 
 // ==========================================
-// VIEW: CALENDARIO COMPARTIDO (CON EXPOSICIONES)
+// VIEW: CALENDARIO COMPARTIDO (CON FILTROS)
 // ==========================================
-function CalendarView({ user, calendarEvents, subjects }) {
+function CalendarView({ user, calendarEvents, subjects, subjectDetails }) {
+  const [filterTab, setFilterTab] = useState('mis_fechas'); // 'mis_fechas' o 'general'
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ title: '', date: '', type: 'Exam', subjectId: subjects[0].id });
 
@@ -750,46 +751,91 @@ function CalendarView({ user, calendarEvents, subjects }) {
   };
 
   const todayStr = new Date().toISOString().split('T')[0];
+  
+  // Ordenar fechas futuras
   const upcomingEvents = calendarEvents.filter(e => e.date >= todayStr);
+  
+  // Filtrar solo las materias que el usuario tiene como "cursando"
+  const myEvents = upcomingEvents.filter(e => subjectDetails[e.subjectId]?.status === 'cursando');
+  
+  // Elegir qué lista mostrar basado en la pestaña activa
+  const displayedEvents = filterTab === 'mis_fechas' ? myEvents : upcomingEvents;
 
   return (
-    <div className="max-w-4xl mx-auto"><div className="flex justify-between items-center mb-6"><div><h2 className="text-2xl font-bold">Calendario</h2><p className="text-sm text-slate-500">Fechas de la comunidad.</p></div><button onClick={() => setShowForm(!showForm)} className="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors">Agendar</button></div>
+    <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
+      
+      {/* BOTONES DE FILTRO SUPERIORES */}
+      <div className="flex justify-center mb-8">
+        <div className="bg-slate-200 p-1 rounded-xl inline-flex shadow-inner">
+          <button onClick={() => { setFilterTab('mis_fechas'); setShowForm(false); }} className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${filterTab === 'mis_fechas' ? 'bg-white text-teal-700 shadow' : 'text-slate-600 hover:text-slate-800'}`}>
+            <Calendar size={16} /> Mis Fechas
+          </button>
+          <button onClick={() => { setFilterTab('general'); setShowForm(false); }} className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${filterTab === 'general' ? 'bg-white text-teal-700 shadow' : 'text-slate-600 hover:text-slate-800'}`}>
+            <Users size={16} /> Calendario General
+          </button>
+        </div>
+      </div>
+
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800">{filterTab === 'mis_fechas' ? 'Mis Fechas Importantes' : 'Calendario de la Comunidad'}</h2>
+          <p className="text-sm text-slate-500">
+            {filterTab === 'mis_fechas' ? 'Eventos de las materias que estás cursando.' : 'Todas las fechas cargadas por estudiantes.'}
+          </p>
+        </div>
+        <button onClick={() => setShowForm(!showForm)} className="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors shadow-sm flex items-center gap-2 font-medium">
+          {showForm ? <X size={18}/> : <Plus size={18}/>} 
+          <span className="hidden sm:inline">{showForm ? 'Cancelar' : 'Agendar'}</span>
+        </button>
+      </div>
+
       {showForm && (
-        <form onSubmit={handleAdd} className="bg-white p-5 rounded-xl border border-teal-200 mb-8 grid grid-cols-2 gap-4 shadow-sm">
-          <input required placeholder="Título del evento" className="border border-slate-300 p-2 rounded-lg col-span-2 focus:ring-2 focus:ring-teal-500" onChange={e => setFormData({...formData, title: e.target.value})} />
-          <select className="border border-slate-300 p-2 rounded-lg focus:ring-2 focus:ring-teal-500" onChange={e => setFormData({...formData, type: e.target.value})}>
+        <form onSubmit={handleAdd} className="bg-white p-5 rounded-xl border border-teal-200 mb-8 grid grid-cols-2 gap-4 shadow-md">
+          <input required placeholder="Título del evento" className="border border-slate-300 p-2 rounded-lg col-span-2 focus:ring-2 focus:ring-teal-500 outline-none" onChange={e => setFormData({...formData, title: e.target.value})} />
+          <select className="border border-slate-300 p-2 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" onChange={e => setFormData({...formData, type: e.target.value})}>
             <option value="Exam">Examen / Parcial</option>
             <option value="TP">Trabajo Práctico</option>
             <option value="Exposicion">Exposición / Presentación</option>
           </select>
-          <input type="date" required className="border border-slate-300 p-2 rounded-lg focus:ring-2 focus:ring-teal-500" onChange={e => setFormData({...formData, date: e.target.value})} />
-          <select className="border border-slate-300 p-2 rounded-lg col-span-2 focus:ring-2 focus:ring-teal-500" onChange={e => setFormData({...formData, subjectId: e.target.value})}>{subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
-          <button type="submit" className="col-span-2 bg-teal-50 text-teal-700 font-bold py-2 rounded-lg hover:bg-teal-100 transition-colors">Guardar Fecha</button>
+          <input type="date" required className="border border-slate-300 p-2 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" onChange={e => setFormData({...formData, date: e.target.value})} />
+          <select className="border border-slate-300 p-2 rounded-lg col-span-2 focus:ring-2 focus:ring-teal-500 outline-none" onChange={e => setFormData({...formData, subjectId: e.target.value})}>{subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
+          <button type="submit" className="col-span-2 bg-teal-50 text-teal-700 font-bold py-2.5 rounded-lg hover:bg-teal-100 transition-colors border border-teal-100">Guardar Fecha</button>
         </form>
       )}
+      
       <div className="space-y-3">
-        {upcomingEvents.map(ev => {
+        {displayedEvents.map(ev => {
            const isExam = ev.type === 'Exam';
            const isExpo = ev.type === 'Exposicion';
            const dateObj = new Date(ev.date + "T00:00:00");
            return (
-            <div key={ev.id} className={`bg-white rounded-xl border flex relative overflow-hidden shadow-sm ${isExam ? 'border-orange-200' : isExpo ? 'border-purple-200' : 'border-blue-200'}`}>
-              {user.uid === ev.authorId && <button onClick={() => deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'calendar', ev.id))} className="absolute top-4 right-4 text-slate-300 hover:text-red-500"><Trash2 size={16}/></button>}
-              <div className={`w-24 flex flex-col items-center justify-center border-r p-3 ${isExam ? 'bg-orange-50 border-orange-100' : isExpo ? 'bg-purple-50 border-purple-100' : 'bg-blue-50 border-blue-100'}`}>
+            <div key={ev.id} className={`bg-white rounded-xl border flex relative overflow-hidden shadow-sm hover:shadow-md transition-shadow group ${isExam ? 'border-orange-200' : isExpo ? 'border-purple-200' : 'border-blue-200'}`}>
+              {user.uid === ev.authorId && (
+                <button onClick={() => deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'calendar', ev.id))} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-full transition-all opacity-0 group-hover:opacity-100">
+                  <Trash2 size={16}/>
+                </button>
+              )}
+              <div className={`w-24 flex flex-col items-center justify-center border-r p-3 shrink-0 ${isExam ? 'bg-orange-50 border-orange-100' : isExpo ? 'bg-purple-50 border-purple-100' : 'bg-blue-50 border-blue-100'}`}>
                 <span className={`text-xs font-bold uppercase ${isExam ? 'text-orange-600' : isExpo ? 'text-purple-600' : 'text-blue-600'}`}>{dateObj.toLocaleDateString('es-ES', { month: 'short' })}</span>
                 <span className={`text-2xl font-black ${isExam ? 'text-orange-700' : isExpo ? 'text-purple-700' : 'text-blue-700'}`}>{dateObj.getDate()}</span>
               </div>
-              <div className="pl-4 py-3 flex flex-col justify-center">
+              <div className="pl-4 py-3 pr-10 flex flex-col justify-center w-full">
                 <div className="flex items-center gap-2 mb-1">
                   <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${isExam ? 'bg-orange-100 text-orange-700' : isExpo ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>{isExam ? 'Examen' : isExpo ? 'Exposición' : 'Entrega'}</span>
                 </div>
-                <h4 className="font-bold text-slate-800">{ev.title}</h4>
-                <p className="text-sm text-slate-500">{subjects.find(s=>s.id===ev.subjectId)?.name}</p>
+                <h4 className="font-bold text-slate-800 leading-tight mb-0.5">{ev.title}</h4>
+                <p className="text-sm text-slate-500 truncate">{subjects.find(s=>s.id===ev.subjectId)?.name}</p>
               </div>
             </div>
           )
         })}
-        {upcomingEvents.length === 0 && <div className="text-center py-12 bg-white rounded-xl border border-dashed border-slate-300 text-slate-500">No hay eventos próximos.</div>}
+        {displayedEvents.length === 0 && (
+          <div className="text-center py-16 bg-white rounded-xl border border-dashed border-slate-300 flex flex-col items-center justify-center">
+            <CalendarDays size={40} className="text-slate-300 mb-3" />
+            <p className="text-slate-500 font-medium">No hay eventos próximos.</p>
+            {filterTab === 'mis_fechas' && <p className="text-xs text-slate-400 mt-1 max-w-sm">Si tienes una fecha importante, agéndala usando el botón de arriba.</p>}
+          </div>
+        )}
       </div>
     </div>
   );
