@@ -8,15 +8,15 @@
   "description": "Organización comunitaria para la facultad",
   "icons": [
     {
-      "src": "/icon.svg",
+      "src": "https://cdn-icons-png.flaticon.com/192/4005/4005111.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon.svg",
+      "src": "https://cdn-icons-png.flaticon.com/512/4005/4005111.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
