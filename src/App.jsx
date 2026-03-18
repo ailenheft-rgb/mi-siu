@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Check, Lock, Unlock, GraduationCap, AlertCircle, Calendar, Folder, BookOpen, Plus, ExternalLink, Trash2, CalendarDays, Clock, Users, Headphones, PlayCircle, Radio, X, Save, FileText, LogOut, MessageSquare, Send, Trophy, XCircle, User } from 'lucide-react';
+import { Check, Lock, Unlock, GraduationCap, AlertCircle, Calendar, Folder, BookOpen, Plus, ExternalLink, Trash2, CalendarDays, Clock, Users, Headphones, PlayCircle, Radio, X, Save, FileText, LogOut, MessageSquare, Send, Trophy, XCircle, User, Building, CalendarPlus, ChevronLeft, ChevronRight, Gift } from 'lucide-react';
 
 // --- FIREBASE IMPORTS ---
 import { initializeApp } from 'firebase/app';
@@ -28,7 +28,7 @@ const INITIAL_SUBJECTS = [
   { id: 'lab_dig', name: 'Introducción al laboratorio digital', year: 1, semester: 1, prereqs: [] },
   { id: 'loc1', name: 'Locución I', year: 1, semester: 1, prereqs: [] },
   { id: 'lab_creat', name: 'Laboratorio de creatividad e innovación', year: 1, semester: 1, prereqs: [] },
-  { id: 'prin_org', name: 'Principios de organización y administración', year: 1, semester: 1, prereqs: [] },
+  { id: 'prin_org', name: 'Principios de organización y administration', year: 1, semester: 1, prereqs: [] },
   { id: 'hist_ideas1', name: 'Historia universal de las ideas I', year: 1, semester: 1, prereqs: [] },
   { id: 'taller_red', name: 'Taller de redacción', year: 1, semester: 1, prereqs: [] },
   { id: 'soc_com', name: 'Sociología de la comunicación', year: 1, semester: 1, prereqs: [] },
@@ -103,6 +103,181 @@ const INITIAL_SUBJECTS = [
   { id: 'mov_rel', name: 'Movimientos religiosos contemporáneos', year: 4, semester: 2, prereqs: [] },
 ];
 
+// --- FECHAS OFICIALES UAP 2026 (Extraídas con precisión del PDF oficial) ---
+const UAP_CALENDAR_2026 = [
+  // FERIADOS Y ASUETOS
+  { date: '2026-01-01', title: 'Año Nuevo', type: 'Feriado' },
+  { date: '2026-02-03', title: 'Batalla de Caseros', type: 'Feriado' },
+  { date: '2026-02-16', title: 'Carnaval', type: 'Feriado' },
+  { date: '2026-02-17', title: 'Carnaval', type: 'Feriado' },
+  { date: '2026-03-23', title: 'Día no laborable (Fines Turísticos)', type: 'Feriado' },
+  { date: '2026-03-24', title: 'Día de la Memoria, Verdad y Justicia', type: 'Feriado' },
+  { date: '2026-04-02', title: 'Jueves Santo / Día del Veterano y Caídos', type: 'Feriado' },
+  { date: '2026-04-03', title: 'Viernes Santo', type: 'Feriado' },
+  { date: '2026-05-01', title: 'Día del Trabajador', type: 'Feriado' },
+  { date: '2026-05-25', title: 'Revolución de Mayo', type: 'Feriado' },
+  { date: '2026-06-15', title: 'Muerte Gral. M. Güemes', type: 'Feriado' },
+  { date: '2026-06-20', title: 'Muerte Gral. Belgrano', type: 'Feriado' },
+  { date: '2026-07-09', title: 'Día de la Independencia', type: 'Feriado' },
+  { date: '2026-07-10', title: 'Día no laborable (Fines Turísticos)', type: 'Feriado' },
+  { date: '2026-08-17', title: 'Muerte Gral. San Martín', type: 'Feriado' },
+  { date: '2026-09-21', title: 'Día del Estudiante', type: 'Feriado' },
+  { date: '2026-09-26', title: 'Día de LSM', type: 'Feriado' },
+  { date: '2026-09-29', title: 'Patrono de Entre Ríos', type: 'Feriado' },
+  { date: '2026-10-12', title: 'Día de la Diversidad Cultural', type: 'Feriado' },
+  { date: '2026-11-23', title: 'Día de la Soberanía Nacional', type: 'Feriado' },
+  { date: '2026-12-07', title: 'Día no laborable (Fines Turísticos)', type: 'Feriado' },
+  { date: '2026-12-08', title: 'Inmaculada Concepción', type: 'Feriado' },
+  { date: '2026-12-25', title: 'Navidad', type: 'Feriado' },
+  { date: '2026-12-31', title: 'Asueto Administrativo', type: 'Feriado' },
+
+  // EVENTOS INSTITUCIONALES Y CLASES
+  { date: '2026-03-06', title: 'Starting UAP', type: 'Institucional' },
+  { date: '2026-03-07', title: 'Starting UAP', type: 'Institucional' },
+  { date: '2026-03-08', title: 'Starting UAP', type: 'Institucional' },
+  { date: '2026-03-09', title: 'Inicio de clases 1er Cuatrimestre', type: 'Institucional' },
+  { date: '2026-03-10', title: 'Acto formal de inicio de clases', type: 'Institucional' },
+  { date: '2026-03-20', title: 'Homecoming', type: 'Institucional' },
+  { date: '2026-03-21', title: 'Homecoming', type: 'Institucional' },
+  { date: '2026-03-22', title: 'Homecoming', type: 'Institucional' },
+  { date: '2026-03-27', title: 'Fiesta Misionera', type: 'Institucional' },
+  { date: '2026-03-28', title: 'Fiesta Misionera', type: 'Institucional' },
+  { date: '2026-04-04', title: 'Raíces del Adventismo', type: 'Institucional' },
+  { date: '2026-04-11', title: 'Congreso de Psicología', type: 'Institucional' },
+  { date: '2026-04-20', title: 'Inicio de Tertulias', type: 'Institucional' },
+  { date: '2026-05-09', title: 'Raíces del Adventismo', type: 'Institucional' },
+  { date: '2026-05-22', title: 'XVI Simposio Bíblico Teológico', type: 'Institucional' },
+  { date: '2026-05-23', title: 'XVI Simposio Bíblico Teológico', type: 'Institucional' },
+  { date: '2026-05-24', title: 'XVI Simposio Bíblico Teológico', type: 'Institucional' },
+  { date: '2026-06-10', title: 'Raíces del Adventismo', type: 'Institucional' },
+  { date: '2026-06-12', title: 'Graduación', type: 'Institucional' },
+  { date: '2026-06-13', title: 'Graduación', type: 'Institucional' },
+  { date: '2026-06-14', title: 'Graduación', type: 'Institucional' },
+  { date: '2026-08-03', title: 'Inicio de clases 2do Cuatrimestre', type: 'Institucional' },
+  { date: '2026-08-08', title: 'Raíces del Adventismo / 2º Homecoming', type: 'Institucional' },
+  { date: '2026-08-21', title: 'I Will Go UA/UAP', type: 'Institucional' },
+  { date: '2026-08-22', title: 'I Will Go UA/UAP', type: 'Institucional' },
+  { date: '2026-09-02', title: 'Congreso Sudamericano de Fe y Ciencia', type: 'Institucional' },
+  { date: '2026-09-03', title: 'Congreso Sudamericano de Fe y Ciencia', type: 'Institucional' },
+  { date: '2026-09-04', title: 'Congreso Sudamericano de Fe y Ciencia', type: 'Institucional' },
+  { date: '2026-09-05', title: 'Congreso Sudamericano de Fe y Ciencia', type: 'Institucional' },
+  { date: '2026-09-12', title: 'Raíces del Adventismo', type: 'Institucional' },
+  { date: '2026-09-17', title: 'Día del Profesor', type: 'Institucional' },
+  { date: '2026-10-03', title: 'Fiesta de las Naciones', type: 'Institucional' },
+  { date: '2026-10-04', title: 'Fiesta de las Naciones', type: 'Institucional' },
+  { date: '2026-10-10', title: 'Raíces del Adventismo', type: 'Institucional' },
+  { date: '2026-11-07', title: 'Raíces del Adventismo', type: 'Institucional' },
+  { date: '2026-11-13', title: 'Graduación', type: 'Institucional' },
+  { date: '2026-11-14', title: 'Graduación', type: 'Institucional' },
+  { date: '2026-11-15', title: 'Graduación', type: 'Institucional' },
+
+  // TRÁMITES Y ADMINISTRATIVO
+  { date: '2026-02-23', title: 'Inicio Matrícula Web Ingresantes', type: 'Tramite' },
+  { date: '2026-03-16', title: 'Último día para solicitar Graduación', type: 'Tramite' },
+  { date: '2026-03-31', title: 'Último día finalizar matriculación', type: 'Tramite' },
+  { date: '2026-05-29', title: 'Último día abandono asig. cuatrimestrales', type: 'Tramite' },
+  { date: '2026-07-17', title: 'Inicio Matrícula Web (2do Cuat.)', type: 'Tramite' },
+  { date: '2026-08-20', title: 'Último día para solicitar Graduación', type: 'Tramite' },
+  { date: '2026-08-31', title: 'Último día finalizar matriculación', type: 'Tramite' },
+  { date: '2026-09-04', title: 'Último día abandono asig. anuales', type: 'Tramite' },
+  { date: '2026-10-30', title: 'Último día abandono asig. cuatrimestrales', type: 'Tramite' },
+  { date: '2026-11-24', title: 'Inicio inscrip. online a exámenes', type: 'Tramite' },
+
+  // EVENTOS ESPIRITUALES
+  { date: '2026-03-21', title: 'Día Mundial del Joven Adventista', type: 'Espiritual' },
+  { date: '2026-03-28', title: 'Evangelismo de Semana Santa', type: 'Espiritual' },
+  { date: '2026-03-29', title: 'Evangelismo de Semana Santa', type: 'Espiritual' },
+  { date: '2026-03-30', title: 'Evangelismo de Semana Santa', type: 'Espiritual' },
+  { date: '2026-03-31', title: 'Evangelismo de Semana Santa', type: 'Espiritual' },
+  { date: '2026-04-01', title: 'Evangelismo de Semana Santa', type: 'Espiritual' },
+  { date: '2026-04-02', title: 'Evangelismo de Semana Santa', type: 'Espiritual' },
+  { date: '2026-04-03', title: 'Evangelismo de Semana Santa', type: 'Espiritual' },
+  { date: '2026-04-04', title: 'Evangelismo de Semana Santa', type: 'Espiritual' },
+  { date: '2026-05-01', title: 'Viernes en Familia', type: 'Espiritual' },
+  { date: '2026-05-10', title: '1º Semana de Oración', type: 'Espiritual' },
+  { date: '2026-05-11', title: '1º Semana de Oración', type: 'Espiritual' },
+  { date: '2026-05-12', title: '1º Semana de Oración', type: 'Espiritual' },
+  { date: '2026-05-13', title: '1º Semana de Oración', type: 'Espiritual' },
+  { date: '2026-05-14', title: '1º Semana de Oración', type: 'Espiritual' },
+  { date: '2026-05-15', title: '1º Semana de Oración', type: 'Espiritual' },
+  { date: '2026-05-16', title: '1º Semana de Oración', type: 'Espiritual' },
+  { date: '2026-05-26', title: 'Semana del Voluntariado', type: 'Espiritual' },
+  { date: '2026-05-27', title: 'Semana del Voluntariado', type: 'Espiritual' },
+  { date: '2026-05-28', title: 'Semana del Voluntariado', type: 'Espiritual' },
+  { date: '2026-05-29', title: 'Semana del Voluntariado', type: 'Espiritual' },
+  { date: '2026-05-30', title: 'Semana del Voluntariado', type: 'Espiritual' },
+  { date: '2026-09-18', title: 'Semana de la Esperanza', type: 'Espiritual' },
+  { date: '2026-09-19', title: 'Semana de la Esperanza', type: 'Espiritual' },
+  { date: '2026-09-20', title: 'Semana de la Esperanza', type: 'Espiritual' },
+  { date: '2026-09-21', title: 'Semana de la Esperanza', type: 'Espiritual' },
+  { date: '2026-09-22', title: 'Semana de la Esperanza', type: 'Espiritual' },
+  { date: '2026-09-23', title: 'Semana de la Esperanza', type: 'Espiritual' },
+  { date: '2026-09-24', title: 'Semana de la Esperanza', type: 'Espiritual' },
+  { date: '2026-09-25', title: 'Semana de la Esperanza', type: 'Espiritual' },
+  { date: '2026-09-26', title: 'Semana de la Esperanza', type: 'Espiritual' },
+  { date: '2026-10-17', title: '2º Semana de Oración', type: 'Espiritual' },
+  { date: '2026-10-18', title: '2º Semana de Oración', type: 'Espiritual' },
+  { date: '2026-10-19', title: '2º Semana de Oración', type: 'Espiritual' },
+  { date: '2026-10-20', title: '2º Semana de Oración', type: 'Espiritual' },
+  { date: '2026-10-21', title: '2º Semana de Oración', type: 'Espiritual' },
+  { date: '2026-10-22', title: '2º Semana de Oración', type: 'Espiritual' },
+  { date: '2026-10-23', title: '2º Semana de Oración', type: 'Espiritual' },
+  { date: '2026-10-24', title: '2º Semana de Oración / Sábado de la Creación', type: 'Espiritual' },
+  { date: '2026-11-21', title: 'Culto de Acción de Gracias', type: 'Espiritual' },
+
+  // RECESO ESCOLAR
+  // Invierno
+  { date: '2026-06-26', title: 'Receso Escolar (Invierno)', type: 'Receso' },
+  { date: '2026-06-27', title: 'Receso Escolar (Invierno)', type: 'Receso' },
+  { date: '2026-06-28', title: 'Receso Escolar (Invierno)', type: 'Receso' },
+  { date: '2026-06-29', title: 'Receso Escolar (Invierno)', type: 'Receso' },
+  { date: '2026-06-30', title: 'Receso Escolar (Invierno)', type: 'Receso' },
+  { date: '2026-07-01', title: 'Receso Escolar (Invierno)', type: 'Receso' },
+  { date: '2026-07-02', title: 'Receso Escolar (Invierno)', type: 'Receso' },
+  { date: '2026-07-03', title: 'Receso Escolar (Invierno)', type: 'Receso' },
+  { date: '2026-07-04', title: 'Receso Escolar (Invierno)', type: 'Receso' },
+  { date: '2026-07-05', title: 'Receso Escolar (Invierno)', type: 'Receso' },
+  { date: '2026-07-06', title: 'Receso Escolar (Invierno)', type: 'Receso' },
+  { date: '2026-07-07', title: 'Receso Escolar (Invierno)', type: 'Receso' },
+  { date: '2026-07-08', title: 'Receso Escolar (Invierno)', type: 'Receso' },
+  { date: '2026-07-09', title: 'Receso Escolar (Invierno)', type: 'Receso' },
+  { date: '2026-07-10', title: 'Receso Escolar (Invierno)', type: 'Receso' },
+  // Verano
+  { date: '2026-12-18', title: 'Receso Escolar (Verano)', type: 'Receso' },
+  { date: '2026-12-19', title: 'Receso Escolar (Verano)', type: 'Receso' },
+  { date: '2026-12-20', title: 'Receso Escolar (Verano)', type: 'Receso' },
+  { date: '2026-12-21', title: 'Receso Escolar (Verano)', type: 'Receso' },
+  { date: '2026-12-22', title: 'Receso Escolar (Verano)', type: 'Receso' },
+  { date: '2026-12-23', title: 'Receso Escolar (Verano)', type: 'Receso' },
+  { date: '2026-12-24', title: 'Receso Escolar (Verano)', type: 'Receso' },
+  { date: '2026-12-25', title: 'Receso Escolar (Verano)', type: 'Receso' },
+  { date: '2026-12-26', title: 'Receso Escolar (Verano)', type: 'Receso' },
+  { date: '2026-12-27', title: 'Receso Escolar (Verano)', type: 'Receso' },
+  { date: '2026-12-28', title: 'Receso Escolar (Verano)', type: 'Receso' },
+  { date: '2026-12-29', title: 'Receso Escolar (Verano)', type: 'Receso' },
+  { date: '2026-12-30', title: 'Receso Escolar (Verano)', type: 'Receso' },
+  { date: '2026-12-31', title: 'Receso Escolar (Verano)', type: 'Receso' },
+
+  // SEMANAS DE EXÁMENES FINALES UAP
+  { date: '2026-03-23', title: 'Examen Diagnóstico Inglés', type: 'ExamenesUAP' },
+  { date: '2026-08-18', title: 'Examen Diagnóstico Inglés', type: 'ExamenesUAP' },
+  { date: '2026-07-13', title: 'Exámenes Finales 1er Cuat.', type: 'ExamenesUAP' },
+  { date: '2026-07-14', title: 'Exámenes Finales 1er Cuat.', type: 'ExamenesUAP' },
+  { date: '2026-07-15', title: 'Exámenes Finales 1er Cuat.', type: 'ExamenesUAP' },
+  { date: '2026-07-16', title: 'Exámenes Finales 1er Cuat.', type: 'ExamenesUAP' },
+  { date: '2026-07-17', title: 'Exámenes Finales 1er Cuat.', type: 'ExamenesUAP' },
+  { date: '2026-12-09', title: 'Exámenes Finales 2do Cuat.', type: 'ExamenesUAP' },
+  { date: '2026-12-10', title: 'Exámenes Finales 2do Cuat.', type: 'ExamenesUAP' },
+  { date: '2026-12-11', title: 'Exámenes Finales 2do Cuat.', type: 'ExamenesUAP' },
+  { date: '2026-12-12', title: 'Exámenes Finales 2do Cuat.', type: 'ExamenesUAP' },
+  { date: '2026-12-13', title: 'Exámenes Finales 2do Cuat.', type: 'ExamenesUAP' },
+  { date: '2026-12-14', title: 'Exámenes Finales 2do Cuat.', type: 'ExamenesUAP' },
+  { date: '2026-12-15', title: 'Exámenes Finales 2do Cuat.', type: 'ExamenesUAP' },
+  { date: '2026-12-16', title: 'Exámenes Finales 2do Cuat.', type: 'ExamenesUAP' },
+  { date: '2026-12-17', title: 'Exámenes Finales 2do Cuat.', type: 'ExamenesUAP' },
+  { date: '2026-12-18', title: 'Exámenes Finales 2do Cuat.', type: 'ExamenesUAP' },
+];
+
 export default function StudyPlanTracker() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('plan'); 
@@ -148,7 +323,6 @@ export default function StudyPlanTracker() {
   useEffect(() => {
     if (!user) return;
 
-    // A) Private Progress
     const progressRef = doc(db, 'artifacts', appId, 'users', user.uid, 'progress', 'main');
     const unsubProgress = onSnapshot(progressRef, (docSnap) => {
       if (docSnap.exists()) {
@@ -161,7 +335,6 @@ export default function StudyPlanTracker() {
       }
     });
 
-    // B) Public Vault
     const vaultRef = collection(db, 'artifacts', appId, 'public', 'data', 'vault');
     const unsubVault = onSnapshot(vaultRef, (snapshot) => {
       const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -169,7 +342,6 @@ export default function StudyPlanTracker() {
       setVaultItems(items);
     });
 
-    // C) Public Calendar
     const calRef = collection(db, 'artifacts', appId, 'public', 'data', 'calendar');
     const unsubCal = onSnapshot(calRef, (snapshot) => {
       const events = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -177,21 +349,18 @@ export default function StudyPlanTracker() {
       setCalendarEvents(events);
     });
 
-    // D) Public Schedule
     const schedRef = collection(db, 'artifacts', appId, 'public', 'data', 'schedule');
     const unsubSched = onSnapshot(schedRef, (snapshot) => {
       const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setScheduleItems(items);
     });
 
-    // E) Public Availability
     const availRef = collection(db, 'artifacts', appId, 'public', 'data', 'availability');
     const unsubAvail = onSnapshot(availRef, (snapshot) => {
       const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setAvailabilityItems(items);
     });
 
-    // F) Chat Messages
     const chatRef = collection(db, 'artifacts', appId, 'public', 'data', 'chat');
     const unsubChat = onSnapshot(chatRef, (snapshot) => {
       const msgs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -199,7 +368,6 @@ export default function StudyPlanTracker() {
       setChatMessages(msgs);
     });
 
-    // G) Custom Streams
     const streamsRef = collection(db, 'artifacts', appId, 'public', 'data', 'streams');
     const unsubStreams = onSnapshot(streamsRef, (snapshot) => {
       const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -211,18 +379,14 @@ export default function StudyPlanTracker() {
     };
   }, [user]);
 
-  // --- Lógica de Materias ---
   const getSubjectStatus = (subject) => {
     const detail = subjectDetails[subject.id];
     if (detail?.status) return detail.status; 
-    
     if (completedSubjects.includes(subject.id)) return 'aprobada';
-    
     const prerequisitesMet = subject.prereqs.every(preId => {
       const preStatus = subjectDetails[preId]?.status;
       return completedSubjects.includes(preId) || ['aprobada', 'promocion', 'final'].includes(preStatus);
     });
-    
     return prerequisitesMet ? 'available' : 'locked';
   };
 
@@ -263,7 +427,6 @@ export default function StudyPlanTracker() {
     return grouped;
   }, []);
 
-  // --- Cálculos ---
   const progressPercentage = Math.round((completedSubjects.length / INITIAL_SUBJECTS.length) * 100);
 
   const gpaCalculation = useMemo(() => {
@@ -282,12 +445,10 @@ export default function StudyPlanTracker() {
     return countedSubjects > 0 ? (totalScore / countedSubjects).toFixed(2) : '0.00';
   }, [subjectDetails]);
 
-  // PANTALLA DE CARGA
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-teal-600 font-semibold text-xl animate-pulse">Cargando Comunidad...</div>;
   }
 
-  // PANTALLA DE LOGIN
   if (!user) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
@@ -297,17 +458,8 @@ export default function StudyPlanTracker() {
           </div>
           <h1 className="text-3xl font-bold text-slate-800 mb-2">Comunidad Estudiantil</h1>
           <p className="text-slate-500 mb-8">Inicia sesión para guardar tu progreso, sincronizar tus notas y acceder a la comunidad de tu facultad.</p>
-          
-          <button 
-            onClick={handleLogin}
-            className="w-full bg-white border-2 border-slate-200 text-slate-700 font-bold py-3 px-4 rounded-xl hover:bg-slate-50 hover:border-teal-400 transition-all flex items-center justify-center gap-3 shadow-sm"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-            </svg>
+          <button onClick={handleLogin} className="w-full bg-white border-2 border-slate-200 text-slate-700 font-bold py-3 px-4 rounded-xl hover:bg-slate-50 hover:border-teal-400 transition-all flex items-center justify-center gap-3 shadow-sm">
+            <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
             Entrar con Google
           </button>
         </div>
@@ -315,66 +467,24 @@ export default function StudyPlanTracker() {
     );
   }
 
-  // PANTALLA PRINCIPAL
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans pb-12">
-      {/* HEADER */}
       <header className="bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-lg sticky top-0 z-20 border-b border-teal-700/50">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            
             <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg shadow-sm">
-                  <GraduationCap size={28} />
-                </div>
-                <div>
-                  <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white drop-shadow-sm leading-none">Comunidad Estudiantil</h1>
-                  <span className="text-teal-100 text-xs font-medium flex items-center gap-2 mt-1">
-                    {user.photoURL ? (
-                      <img src={user.photoURL} alt="avatar" className="w-5 h-5 rounded-full border border-teal-200" />
-                    ) : (
-                      <User size={14} className="bg-teal-500 rounded-full p-0.5" />
-                    )}
-                    Hola, {user.displayName?.split(' ')[0] || 'Estudiante'}
-                  </span>
-                </div>
+                <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg shadow-sm"><GraduationCap size={28} /></div>
+                <div><h1 className="text-xl md:text-2xl font-bold tracking-tight text-white drop-shadow-sm leading-none">Comunidad Estudiantil</h1><span className="text-teal-100 text-xs font-medium flex items-center gap-2 mt-1">{user.photoURL ? (<img src={user.photoURL} alt="avatar" className="w-5 h-5 rounded-full border border-teal-200" />) : (<User size={14} className="bg-teal-500 rounded-full p-0.5" />)} Hola, {user.displayName?.split(' ')[0] || 'Estudiante'}</span></div>
               </div>
-              
-              <button onClick={handleLogout} className="md:hidden p-2 text-teal-100 hover:text-white" title="Cerrar sesión">
-                <LogOut size={20} />
-              </button>
+              <button onClick={handleLogout} className="md:hidden p-2 text-teal-100 hover:text-white" title="Cerrar sesión"><LogOut size={20} /></button>
             </div>
-            
             <div className="flex items-center gap-4 w-full md:w-auto bg-black/10 backdrop-blur-md p-3 rounded-xl border border-white/10 shadow-inner">
-              
-              {/* Bloque Promedio */}
-              <div className="hidden sm:flex flex-col items-center justify-center pr-4 border-r border-white/20">
-                <span className="text-[10px] text-teal-100 uppercase tracking-wider font-bold">Promedio</span>
-                <span className="text-xl font-black text-white">{gpaCalculation}</span>
-              </div>
-
-              {/* Bloque Progreso */}
-              <div className="flex-1 md:w-56">
-                <div className="flex justify-between text-xs mb-1.5 font-medium text-teal-50 uppercase tracking-wider">
-                  <span>Avance General</span>
-                  <span>{progressPercentage}%</span>
-                </div>
-                <div className="w-full bg-black/20 rounded-full h-2.5 overflow-hidden border border-black/10">
-                  <div 
-                    className="bg-gradient-to-r from-green-400 to-emerald-300 h-full rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(52,211,153,0.5)]"
-                    style={{ width: `${progressPercentage}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              <button onClick={handleLogout} className="hidden md:flex p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-white shadow-sm hover:shadow backdrop-blur-sm" title="Cerrar sesión">
-                <LogOut size={18} />
-              </button>
+              <div className="hidden sm:flex flex-col items-center justify-center pr-4 border-r border-white/20"><span className="text-[10px] text-teal-100 uppercase tracking-wider font-bold">Promedio</span><span className="text-xl font-black text-white">{gpaCalculation}</span></div>
+              <div className="flex-1 md:w-56"><div className="flex justify-between text-xs mb-1.5 font-medium text-teal-50 uppercase tracking-wider"><span>Avance General</span><span>{progressPercentage}%</span></div><div className="w-full bg-black/20 rounded-full h-2.5 overflow-hidden border border-black/10"><div className="bg-gradient-to-r from-green-400 to-emerald-300 h-full rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(52,211,153,0.5)]" style={{ width: `${progressPercentage}%` }}></div></div></div>
+              <button onClick={handleLogout} className="hidden md:flex p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-white shadow-sm hover:shadow backdrop-blur-sm" title="Cerrar sesión"><LogOut size={18} /></button>
             </div>
           </div>
-
-          {/* TAB NAVIGATION */}
           <div className="flex gap-2 mt-6 overflow-x-auto pb-0 hide-scrollbar items-end">
             <TabButton active={activeTab === 'plan'} onClick={() => setActiveTab('plan')} icon={<BookOpen size={18} />} label="Mi Plan" />
             <TabButton active={activeTab === 'vault'} onClick={() => setActiveTab('vault')} icon={<Folder size={18} />} label="Bóveda" />
@@ -387,60 +497,28 @@ export default function StudyPlanTracker() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-8">
-        {activeTab === 'plan' && (
-          <PlanView 
-            subjectsByGroup={subjectsByGroup} completedSubjects={completedSubjects} subjectDetails={subjectDetails}
-            getSubjectStatus={getSubjectStatus} onSubjectClick={handleSubjectClick}
-          />
-        )}
+        {activeTab === 'plan' && <PlanView subjectsByGroup={subjectsByGroup} completedSubjects={completedSubjects} subjectDetails={subjectDetails} getSubjectStatus={getSubjectStatus} onSubjectClick={handleSubjectClick} />}
         {activeTab === 'vault' && <VaultView user={user} vaultItems={vaultItems} subjects={INITIAL_SUBJECTS} />}
-        {/* Le pasamos subjectDetails al Calendario para que sepa qué estamos cursando */}
         {activeTab === 'calendar' && <CalendarView user={user} calendarEvents={calendarEvents} subjects={INITIAL_SUBJECTS} subjectDetails={subjectDetails} />}
         {activeTab === 'schedule' && <ScheduleView user={user} scheduleItems={scheduleItems} availabilityItems={availabilityItems} subjects={INITIAL_SUBJECTS} subjectDetails={subjectDetails} />}
         {activeTab === 'chat' && <ChatView user={user} chatMessages={chatMessages} subjectDetails={subjectDetails} subjects={INITIAL_SUBJECTS} />}
         {activeTab === 'focus' && <FocusView user={user} activeStream={activeStream} setActiveStream={setActiveStream} customStreams={customStreams} />}
       </main>
 
-      {/* REPRODUCTOR GLOBAL FLOTANTE */}
       {activeStream && (
         <div className="fixed bottom-4 right-4 bg-slate-900 text-white p-3 rounded-2xl shadow-2xl border border-slate-700 flex flex-col items-center z-50 animate-in slide-in-from-bottom-5">
-           <div className="flex justify-between w-full items-center mb-2 px-1">
-             <div className="flex items-center gap-2">
-               <Radio size={14} className="text-emerald-400 animate-pulse" />
-               <span className="text-xs font-bold text-slate-300 truncate max-w-[150px]">{activeStream.title}</span>
-             </div>
-             <button onClick={() => setActiveStream(null)} className="text-slate-400 hover:text-white"><X size={16}/></button>
-           </div>
-           {/* Iframe pequeño */}
-           <div className="w-56 h-32 rounded-xl overflow-hidden bg-black">
-             <iframe width="100%" height="100%" src={activeStream.url} title="Radio" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"></iframe>
-           </div>
+           <div className="flex justify-between w-full items-center mb-2 px-1"><div className="flex items-center gap-2"><Radio size={14} className="text-emerald-400 animate-pulse" /><span className="text-xs font-bold text-slate-300 truncate max-w-[150px]">{activeStream.title}</span></div><button onClick={() => setActiveStream(null)} className="text-slate-400 hover:text-white"><X size={16}/></button></div>
+           <div className="w-56 h-32 rounded-xl overflow-hidden bg-black"><iframe width="100%" height="100%" src={activeStream.url} title="Radio" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"></iframe></div>
         </div>
       )}
 
-      {/* MODAL DE MATERIAS */}
-      {selectedSubjectModal && (
-        <SubjectDetailsModal 
-          subject={selectedSubjectModal} currentDetails={subjectDetails[selectedSubjectModal.id] || {}}
-          onSave={(details) => handleSaveSubjectDetails(selectedSubjectModal.id, details)} onClose={() => setSelectedSubjectModal(null)}
-        />
-      )}
+      {selectedSubjectModal && <SubjectDetailsModal subject={selectedSubjectModal} currentDetails={subjectDetails[selectedSubjectModal.id] || {}} onSave={(details) => handleSaveSubjectDetails(selectedSubjectModal.id, details)} onClose={() => setSelectedSubjectModal(null)} />}
     </div>
   );
 }
 
 function TabButton({ active, onClick, icon, label }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-2 px-4 py-3 font-medium transition-all text-sm whitespace-nowrap
-        ${active ? 'bg-slate-50 text-teal-800 border-t-4 border-teal-500 rounded-t-xl shadow-md' 
-                 : 'bg-white/10 text-teal-50 hover:bg-white/20 hover:text-white rounded-t-lg backdrop-blur-sm mb-1'}
-      `}
-    >
-      {icon} {label}
-    </button>
-  );
+  return <button onClick={onClick} className={`flex items-center gap-2 px-4 py-3 font-medium transition-all text-sm whitespace-nowrap ${active ? 'bg-slate-50 text-teal-800 border-t-4 border-teal-500 rounded-t-xl shadow-md' : 'bg-white/10 text-teal-50 hover:bg-white/20 hover:text-white rounded-t-lg backdrop-blur-sm mb-1'}`}>{icon} {label}</button>;
 }
 
 // ==========================================
@@ -449,58 +527,23 @@ function TabButton({ active, onClick, icon, label }) {
 function PlanView({ subjectsByGroup, completedSubjects, subjectDetails, getSubjectStatus, onSubjectClick }) {
   return (
     <>
-      {/* LEYENDA COLORES DEL BOCETO */}
       <div className="flex flex-wrap justify-center gap-3 mb-10 text-xs md:text-sm">
-        <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-slate-200">
-          <div className="w-3 h-3 rounded-full bg-emerald-600"></div><span className="font-bold text-slate-700">Promocionada</span>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-slate-200">
-          <div className="w-3 h-3 rounded-full bg-green-400"></div><span className="font-bold text-slate-700">Aprobada</span>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-slate-200">
-          <div className="w-3 h-3 rounded-full bg-blue-500"></div><span className="font-bold text-slate-700">Regular</span>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-slate-200">
-          <div className="w-3 h-3 rounded-full bg-yellow-400"></div><span className="font-bold text-slate-700">Cursando</span>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-slate-200">
-          <div className="w-3 h-3 rounded-full bg-red-500"></div><span className="font-bold text-slate-700">Pérdida/Libre</span>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-teal-300 ring-2 ring-teal-50">
-          <div className="w-3 h-3 rounded-full bg-white border-2 border-teal-500"></div><span className="font-bold text-teal-700">Disponible</span>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-slate-200 opacity-70">
-          <div className="w-3 h-3 rounded-full bg-slate-300"></div><span className="font-medium text-slate-500">Bloqueada</span>
-        </div>
+        <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-slate-200"><div className="w-3 h-3 rounded-full bg-emerald-600"></div><span className="font-bold text-slate-700">Promocionada</span></div>
+        <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-slate-200"><div className="w-3 h-3 rounded-full bg-green-400"></div><span className="font-bold text-slate-700">Aprobada</span></div>
+        <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-slate-200"><div className="w-3 h-3 rounded-full bg-blue-500"></div><span className="font-bold text-slate-700">Regular</span></div>
+        <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-slate-200"><div className="w-3 h-3 rounded-full bg-yellow-400"></div><span className="font-bold text-slate-700">Cursando</span></div>
+        <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-slate-200"><div className="w-3 h-3 rounded-full bg-red-500"></div><span className="font-bold text-slate-700">Pérdida/Libre</span></div>
+        <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-teal-300 ring-2 ring-teal-50"><div className="w-3 h-3 rounded-full bg-white border-2 border-teal-500"></div><span className="font-bold text-teal-700">Disponible</span></div>
+        <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-slate-200 opacity-70"><div className="w-3 h-3 rounded-full bg-slate-300"></div><span className="font-medium text-slate-500">Bloqueada</span></div>
       </div>
 
       <div className="space-y-16">
         {Object.entries(subjectsByGroup).map(([year, semesters]) => (
           <div key={year} className="relative">
-            <div className="sticky top-28 z-0 flex items-center mb-6">
-               <div className="bg-slate-800 text-white font-bold px-6 py-2 rounded-r-xl shadow-md -ml-4 text-lg border-l-4 border-teal-400">
-                {year}° Año
-              </div>
-              <div className="h-px bg-slate-200 flex-1 ml-4"></div>
-            </div>
-
+            <div className="sticky top-28 z-0 flex items-center mb-6"><div className="bg-slate-800 text-white font-bold px-6 py-2 rounded-r-xl shadow-md -ml-4 text-lg border-l-4 border-teal-400">{year}° Año</div><div className="h-px bg-slate-200 flex-1 ml-4"></div></div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 pl-2">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-teal-700 font-semibold mb-2 bg-teal-50 w-fit px-3 py-1 rounded-md">
-                  <Calendar size={16} /><span>1er Cuatrimestre</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {semesters[1].map(sub => <SubjectCardWrapper key={sub.id} subject={sub} subjectDetails={subjectDetails} completedSubjects={completedSubjects} onToggle={onSubjectClick} getSubjectStatus={getSubjectStatus} />)}
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-teal-700 font-semibold mb-2 bg-teal-50 w-fit px-3 py-1 rounded-md">
-                  <Calendar size={16} /><span>2do Cuatrimestre</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {semesters[2].map(sub => <SubjectCardWrapper key={sub.id} subject={sub} subjectDetails={subjectDetails} completedSubjects={completedSubjects} onToggle={onSubjectClick} getSubjectStatus={getSubjectStatus} />)}
-                </div>
-              </div>
+              <div className="space-y-4"><div className="flex items-center gap-2 text-teal-700 font-semibold mb-2 bg-teal-50 w-fit px-3 py-1 rounded-md"><Calendar size={16} /><span>1er Cuatrimestre</span></div><div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{semesters[1].map(sub => <SubjectCardWrapper key={sub.id} subject={sub} subjectDetails={subjectDetails} completedSubjects={completedSubjects} onToggle={onSubjectClick} getSubjectStatus={getSubjectStatus} />)}</div></div>
+              <div className="space-y-4"><div className="flex items-center gap-2 text-teal-700 font-semibold mb-2 bg-teal-50 w-fit px-3 py-1 rounded-md"><Calendar size={16} /><span>2do Cuatrimestre</span></div><div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{semesters[2].map(sub => <SubjectCardWrapper key={sub.id} subject={sub} subjectDetails={subjectDetails} completedSubjects={completedSubjects} onToggle={onSubjectClick} getSubjectStatus={getSubjectStatus} />)}</div></div>
             </div>
           </div>
         ))}
@@ -512,17 +555,13 @@ function PlanView({ subjectsByGroup, completedSubjects, subjectDetails, getSubje
 function SubjectCardWrapper({ subject, subjectDetails, completedSubjects, onToggle, getSubjectStatus }) {
   const status = getSubjectStatus(subject);
   const detail = subjectDetails[subject.id];
-  
-  // Calcular correlativas faltantes
   const missingPrereqsNames = subject.prereqs.filter(preId => {
     const preStatus = subjectDetails[preId]?.status;
     return !(completedSubjects.includes(preId) || ['aprobada', 'promocion', 'final'].includes(preStatus));
   }).map(id => INITIAL_SUBJECTS.find(s => s.id === id)?.name);
-
   return <SubjectCard subject={subject} status={status} detail={detail} missingPrereqs={missingPrereqsNames} onToggle={() => onToggle(subject.id, status)} />;
 }
 
-// TARJETA DE MATERIA CON COLORES EXACTOS AL BOCETO
 function SubjectCard({ subject, status, detail, missingPrereqs, onToggle }) {
   const isLocked = status === 'locked';
   const isPromocion = status === 'promocion';
@@ -531,86 +570,31 @@ function SubjectCard({ subject, status, detail, missingPrereqs, onToggle }) {
   const isCursando = status === 'cursando';
   const isPerdida = status === 'perdida';
   const isAvailable = status === 'available';
-
-  // Nota definitiva en AZUL
   const finalGrade = detail?.gradePromocion || detail?.gradeFinal || detail?.grade;
 
   return (
-    <div 
-      onClick={onToggle}
-      className={`
-        relative p-3 rounded-xl border transition-all duration-200 cursor-pointer select-none group flex flex-col h-full min-h-[100px] shadow-sm
-        ${isLocked ? 'bg-slate-50/50 border-slate-200 hover:bg-slate-100' : ''}
-        ${isPromocion ? 'bg-emerald-600 border-emerald-700 text-white shadow-md' : ''}
-        ${isAprobada ? 'bg-green-100 border-green-400 text-green-900' : ''}
-        ${isRegular ? 'bg-blue-100 border-blue-400 text-blue-900' : ''}
-        ${isCursando ? 'bg-yellow-100 border-yellow-400 text-yellow-900' : ''}
-        ${isPerdida ? 'bg-red-100 border-red-400 text-red-900' : ''}
-        ${isAvailable ? 'bg-white border-teal-300 ring-2 ring-teal-50 hover:ring-teal-100 hover:border-teal-400 shadow-md hover:-translate-y-0.5' : ''}
-      `}
-    >
+    <div onClick={onToggle} className={`relative p-3 rounded-xl border transition-all duration-200 cursor-pointer select-none group flex flex-col h-full min-h-[100px] shadow-sm ${isLocked ? 'bg-slate-50/50 border-slate-200 hover:bg-slate-100' : ''} ${isPromocion ? 'bg-emerald-600 border-emerald-700 text-white shadow-md' : ''} ${isAprobada ? 'bg-green-100 border-green-400 text-green-900' : ''} ${isRegular ? 'bg-blue-100 border-blue-400 text-blue-900' : ''} ${isCursando ? 'bg-yellow-100 border-yellow-400 text-yellow-900' : ''} ${isPerdida ? 'bg-red-100 border-red-400 text-red-900' : ''} ${isAvailable ? 'bg-white border-teal-300 ring-2 ring-teal-50 hover:ring-teal-100 hover:border-teal-400 shadow-md hover:-translate-y-0.5' : ''}`}>
       <div className="flex justify-between items-start gap-2 mb-1">
         <h3 className={`font-semibold text-sm leading-snug ${isLocked ? 'text-slate-400' : isPromocion ? 'text-white' : 'text-slate-800'}`}>{subject.name}</h3>
-        <div className={`shrink-0 p-1 rounded-full transition-colors mt-0.5
-          ${isPromocion ? 'bg-white/20 text-white' : ''}
-          ${isAprobada ? 'bg-green-500 text-white' : ''}
-          ${isRegular ? 'bg-blue-500 text-white' : ''}
-          ${isCursando ? 'bg-yellow-400 text-white' : ''}
-          ${isPerdida ? 'bg-red-500 text-white' : ''}
-          ${isAvailable ? 'bg-teal-100 text-teal-600' : ''}
-          ${isLocked ? 'text-slate-300' : ''}
-        `}>
-          {isPromocion && <Trophy size={14} strokeWidth={2.5} />}
-          {isAprobada && <Check size={14} strokeWidth={3} />}
-          {isRegular && <FileText size={14} strokeWidth={2} />}
-          {isCursando && <BookOpen size={14} strokeWidth={2} />}
-          {isPerdida && <XCircle size={14} strokeWidth={2} />}
-          {isAvailable && <Unlock size={14} />}
-          {isLocked && <Lock size={14} />}
+        <div className={`shrink-0 p-1 rounded-full transition-colors mt-0.5 ${isPromocion ? 'bg-white/20 text-white' : ''} ${isAprobada ? 'bg-green-500 text-white' : ''} ${isRegular ? 'bg-blue-500 text-white' : ''} ${isCursando ? 'bg-yellow-400 text-white' : ''} ${isPerdida ? 'bg-red-500 text-white' : ''} ${isAvailable ? 'bg-teal-100 text-teal-600' : ''} ${isLocked ? 'text-slate-300' : ''}`}>
+          {isPromocion && <Trophy size={14} strokeWidth={2.5} />} {isAprobada && <Check size={14} strokeWidth={3} />} {isRegular && <FileText size={14} strokeWidth={2} />} {isCursando && <BookOpen size={14} strokeWidth={2} />} {isPerdida && <XCircle size={14} strokeWidth={2} />} {isAvailable && <Unlock size={14} />} {isLocked && <Lock size={14} />}
         </div>
       </div>
-
-      {/* DETALLES DE NOTAS */}
       <div className="mt-2 space-y-1">
-        {(isRegular || isAprobada) && detail?.gradeCursada && (
-          <div className={`text-[10px] font-bold px-2 py-0.5 rounded w-fit ${isPromocion ? 'bg-white/20 text-emerald-50' : 'bg-white/50 text-slate-600'}`}>Cursada: {detail.gradeCursada}</div>
-        )}
-        
-        {/* NOTA DEFINITIVA EN AZUL CLARO (o blanco si el fondo es oscuro) */}
-        {finalGrade && (
-          <div className={`text-xs font-black px-2 py-0.5 rounded w-fit uppercase tracking-wide border ${isPromocion ? 'bg-white text-emerald-700 border-emerald-200' : 'bg-blue-50 text-blue-600 border-blue-200'}`}>
-            Definitiva: {finalGrade}
-          </div>
-        )}
+        {(isRegular || isAprobada) && detail?.gradeCursada && (<div className={`text-[10px] font-bold px-2 py-0.5 rounded w-fit ${isPromocion ? 'bg-white/20 text-emerald-50' : 'bg-white/50 text-slate-600'}`}>Cursada: {detail.gradeCursada}</div>)}
+        {finalGrade && (<div className={`text-xs font-black px-2 py-0.5 rounded w-fit uppercase tracking-wide border ${isPromocion ? 'bg-white text-emerald-700 border-emerald-200' : 'bg-blue-50 text-blue-600 border-blue-200'}`}>Definitiva: {finalGrade}</div>)}
       </div>
-      
       {isLocked && missingPrereqs && missingPrereqs.length > 0 && (
-        <div className="mt-auto pt-2">
-          <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-red-400 mb-0.5">
-            <AlertCircle size={10} /><span>Falta correlativa</span>
-          </div>
-          <p className="text-[10px] text-slate-500 leading-tight">
-            {missingPrereqs[0]} {missingPrereqs.length > 1 && `+ ${missingPrereqs.length - 1} más`}
-          </p>
-        </div>
+        <div className="mt-auto pt-2"><div className="flex items-center gap-1 text-[10px] uppercase font-bold text-red-400 mb-0.5"><AlertCircle size={10} /><span>Falta correlativa</span></div><p className="text-[10px] text-slate-500 leading-tight">{missingPrereqs[0]} {missingPrereqs.length > 1 && `+ ${missingPrereqs.length - 1} más`}</p></div>
       )}
     </div>
   );
 }
 
-// ==========================================
-// MODAL DETALLES DE MATERIA (COMPLETO DEL BOCETO)
-// ==========================================
 function SubjectDetailsModal({ subject, currentDetails, onSave, onClose }) {
   const [formData, setFormData] = useState({
-    status: currentDetails.status || 'pendiente',
-    gradeCursada: currentDetails.gradeCursada || '',
-    gradeFinal: currentDetails.gradeFinal || '',
-    gradePromocion: currentDetails.gradePromocion || currentDetails.grade || '',
-    profesorName: currentDetails.profesorName || '',
-    profesorContact: currentDetails.profesorContact || '',
-    aula: currentDetails.aula || '',
-    creditos: currentDetails.creditos || ''
+    status: currentDetails.status || 'pendiente', gradeCursada: currentDetails.gradeCursada || '', gradeFinal: currentDetails.gradeFinal || '', gradePromocion: currentDetails.gradePromocion || currentDetails.grade || '',
+    profesorName: currentDetails.profesorName || '', profesorContact: currentDetails.profesorContact || '', aula: currentDetails.aula || '', creditos: currentDetails.creditos || ''
   });
 
   return (
@@ -620,76 +604,29 @@ function SubjectDetailsModal({ subject, currentDetails, onSave, onClose }) {
           <div><span className="text-teal-100 text-xs font-bold uppercase tracking-wider block">Ficha de la Materia</span><h2 className="text-lg font-bold pr-4">{subject.name}</h2></div>
           <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
         </div>
-        
         <div className="p-6 overflow-y-auto bg-slate-50">
           <form id="subject-form" onSubmit={(e) => { e.preventDefault(); onSave(formData); }} className="space-y-6">
-            
-            {/* SECCIÓN 1: ESTADO Y NOTAS */}
             <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
               <h3 className="text-xs font-bold text-teal-600 uppercase tracking-wider mb-3 border-b pb-2">Progreso Académico</h3>
-              <div className="mb-4">
-                <label className="block text-sm font-bold text-slate-700 mb-2">Estado Actual</label>
-                <select className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 font-medium text-slate-700" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
-                  <option value="pendiente">⚪ Pendiente (Disponible)</option>
-                  <option value="cursando">🟡 Cursando actualmente</option>
-                  <option value="regular">🔵 Regularizada (Falta final)</option>
-                  <option value="promocion">🌲 Aprobada por Promoción (8 o más)</option>
-                  <option value="final">🟢 Aprobada con Examen Final</option>
-                  <option value="perdida">🔴 Pérdida / Libre</option>
-                </select>
-              </div>
-
+              <div className="mb-4"><label className="block text-sm font-bold text-slate-700 mb-2">Estado Actual</label><select className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 font-medium text-slate-700" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}><option value="pendiente">⚪ Pendiente (Disponible)</option><option value="cursando">🟡 Cursando actualmente</option><option value="regular">🔵 Regularizada (Falta final)</option><option value="promocion">🌲 Aprobada por Promoción (8 o más)</option><option value="final">🟢 Aprobada con Examen Final</option><option value="perdida">🔴 Pérdida / Libre</option></select></div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {(formData.status === 'regular' || formData.status === 'final') && (
-                  <div className={formData.status === 'regular' ? 'sm:col-span-2' : ''}>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Nota Cursada</label>
-                    <input type="number" min="1" max="10" className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 bg-slate-50" value={formData.gradeCursada} onChange={e => setFormData({...formData, gradeCursada: e.target.value})} />
-                  </div>
-                )}
-                {formData.status === 'final' && (
-                  <div>
-                    <label className="block text-sm font-bold text-blue-600 mb-1">Nota Definitiva (Final)</label>
-                    <input type="number" min="1" max="10" className="w-full px-3 py-2 border-2 border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 bg-blue-50 font-bold" value={formData.gradeFinal} onChange={e => setFormData({...formData, gradeFinal: e.target.value})} />
-                  </div>
-                )}
-                {(formData.status === 'promocion' || formData.status === 'aprobada') && (
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-bold text-blue-600 mb-1">Nota Definitiva (Promoción)</label>
-                    <input type="number" min="1" max="10" className="w-full px-3 py-2 border-2 border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 bg-blue-50 font-bold" value={formData.gradePromocion} onChange={e => setFormData({...formData, gradePromocion: e.target.value})} />
-                  </div>
-                )}
+                {(formData.status === 'regular' || formData.status === 'final') && (<div className={formData.status === 'regular' ? 'sm:col-span-2' : ''}><label className="block text-sm font-medium text-slate-700 mb-1">Nota Cursada</label><input type="number" min="1" max="10" className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 bg-slate-50" value={formData.gradeCursada} onChange={e => setFormData({...formData, gradeCursada: e.target.value})} /></div>)}
+                {formData.status === 'final' && (<div><label className="block text-sm font-bold text-blue-600 mb-1">Nota Definitiva (Final)</label><input type="number" min="1" max="10" className="w-full px-3 py-2 border-2 border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 bg-blue-50 font-bold" value={formData.gradeFinal} onChange={e => setFormData({...formData, gradeFinal: e.target.value})} /></div>)}
+                {(formData.status === 'promocion' || formData.status === 'aprobada') && (<div className="sm:col-span-2"><label className="block text-sm font-bold text-blue-600 mb-1">Nota Definitiva (Promoción)</label><input type="number" min="1" max="10" className="w-full px-3 py-2 border-2 border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 bg-blue-50 font-bold" value={formData.gradePromocion} onChange={e => setFormData({...formData, gradePromocion: e.target.value})} /></div>)}
               </div>
             </div>
-
-            {/* SECCIÓN 2: INFO DE LA MATERIA (DEL BOCETO) */}
             <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
               <h3 className="text-xs font-bold text-teal-600 uppercase tracking-wider mb-3 border-b pb-2">Información del Profesor y Cursada</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Profesor/a (Nombre)</label>
-                  <input type="text" placeholder="Ej: Lic. María González" className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 bg-slate-50" value={formData.profesorName} onChange={e => setFormData({...formData, profesorName: e.target.value})} />
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Teléfono / Correo / Link</label>
-                  <input type="text" placeholder="Correo o link al campus" className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 bg-slate-50" value={formData.profesorContact} onChange={e => setFormData({...formData, profesorContact: e.target.value})} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Créditos / Horas</label>
-                  <input type="text" placeholder="Ej: 4 Créditos" className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 bg-slate-50" value={formData.creditos} onChange={e => setFormData({...formData, creditos: e.target.value})} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Aula Física/Virtual</label>
-                  <input type="text" placeholder="Ej: Aula 5 / Zoom" className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 bg-slate-50" value={formData.aula} onChange={e => setFormData({...formData, aula: e.target.value})} />
-                </div>
+                <div className="sm:col-span-2"><label className="block text-sm font-medium text-slate-700 mb-1">Profesor/a (Nombre)</label><input type="text" placeholder="Ej: Lic. María González" className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 bg-slate-50" value={formData.profesorName} onChange={e => setFormData({...formData, profesorName: e.target.value})} /></div>
+                <div className="sm:col-span-2"><label className="block text-sm font-medium text-slate-700 mb-1">Teléfono / Correo / Link</label><input type="text" placeholder="Correo o link al campus" className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 bg-slate-50" value={formData.profesorContact} onChange={e => setFormData({...formData, profesorContact: e.target.value})} /></div>
+                <div><label className="block text-sm font-medium text-slate-700 mb-1">Créditos / Horas</label><input type="text" placeholder="Ej: 4 Créditos" className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 bg-slate-50" value={formData.creditos} onChange={e => setFormData({...formData, creditos: e.target.value})} /></div>
+                <div><label className="block text-sm font-medium text-slate-700 mb-1">Aula Física/Virtual</label><input type="text" placeholder="Ej: Aula 5 / Zoom" className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 bg-slate-50" value={formData.aula} onChange={e => setFormData({...formData, aula: e.target.value})} /></div>
               </div>
             </div>
-
           </form>
         </div>
-        <div className="p-4 border-t border-slate-200 bg-white flex justify-end gap-3 shrink-0">
-          <button onClick={onClose} className="px-5 py-2 font-medium hover:bg-slate-100 rounded-lg text-slate-600 transition-colors">Cancelar</button>
-          <button type="submit" form="subject-form" className="px-6 py-2 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-700 transition-colors flex items-center gap-2"><Save size={18}/> Guardar Ficha</button>
-        </div>
+        <div className="p-4 border-t border-slate-200 bg-white flex justify-end gap-3 shrink-0"><button onClick={onClose} className="px-5 py-2 font-medium hover:bg-slate-100 rounded-lg text-slate-600 transition-colors">Cancelar</button><button type="submit" form="subject-form" className="px-6 py-2 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-700 transition-colors flex items-center gap-2"><Save size={18}/> Guardar Ficha</button></div>
       </div>
     </div>
   );
@@ -737,106 +674,238 @@ function VaultView({ user, vaultItems, subjects }) {
 }
 
 // ==========================================
-// VIEW: CALENDARIO COMPARTIDO (CON FILTROS)
+// VIEW: CALENDARIO VISUAL COMPLETO (INTERACTIVO)
 // ==========================================
 function CalendarView({ user, calendarEvents, subjects, subjectDetails }) {
-  const [filterTab, setFilterTab] = useState('mis_fechas'); // 'mis_fechas' o 'general'
+  const [currentDate, setCurrentDate] = useState(new Date(2026, 2, 1)); 
+  const [selectedDateStr, setSelectedDateStr] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ title: '', date: '', type: 'Exam', subjectId: subjects[0].id });
 
+  const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+  const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+
   const handleAdd = async (e) => {
     e.preventDefault();
-    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'calendar'), { ...formData, authorId: user.uid });
+    const finalSubjectId = formData.type === 'Especial' ? 'general' : formData.subjectId;
+    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'calendar'), { ...formData, subjectId: finalSubjectId, authorId: user.uid });
+    setShowForm(false);
+    setFormData({ title: '', date: '', type: 'Exam', subjectId: subjects[0].id });
+  };
+
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDayIndex = new Date(year, month, 1).getDay(); 
+
+  const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+  const calendarCells = [];
+  for (let i = 0; i < firstDayIndex; i++) calendarCells.push(null);
+  for (let i = 1; i <= daysInMonth; i++) {
+    const dStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+    calendarCells.push({ day: i, dateStr: dStr });
+  }
+
+  const eventsForSelectedDate = calendarEvents.filter(e => e.date === selectedDateStr);
+  const uapEventsForSelectedDate = UAP_CALENDAR_2026.filter(e => e.date === selectedDateStr);
+
+  const handleDayClick = (dateStr) => {
+    setSelectedDateStr(dateStr);
+    setFormData({ ...formData, date: dateStr });
     setShowForm(false);
   };
 
-  const todayStr = new Date().toISOString().split('T')[0];
-  
-  // Ordenar fechas futuras
-  const upcomingEvents = calendarEvents.filter(e => e.date >= todayStr);
-  
-  // Filtrar solo las materias que el usuario tiene como "cursando"
-  const myEvents = upcomingEvents.filter(e => subjectDetails[e.subjectId]?.status === 'cursando');
-  
-  // Elegir qué lista mostrar basado en la pestaña activa
-  const displayedEvents = filterTab === 'mis_fechas' ? myEvents : upcomingEvents;
-
   return (
-    <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
+    <div className="max-w-5xl mx-auto animate-in fade-in duration-500">
       
-      {/* BOTONES DE FILTRO SUPERIORES */}
-      <div className="flex justify-center mb-8">
-        <div className="bg-slate-200 p-1 rounded-xl inline-flex shadow-inner">
-          <button onClick={() => { setFilterTab('mis_fechas'); setShowForm(false); }} className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${filterTab === 'mis_fechas' ? 'bg-white text-teal-700 shadow' : 'text-slate-600 hover:text-slate-800'}`}>
-            <Calendar size={16} /> Mis Fechas
-          </button>
-          <button onClick={() => { setFilterTab('general'); setShowForm(false); }} className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${filterTab === 'general' ? 'bg-white text-teal-700 shadow' : 'text-slate-600 hover:text-slate-800'}`}>
-            <Users size={16} /> Calendario General
-          </button>
+      {/* CABECERA DEL CALENDARIO VISUAL */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
+        <div className="bg-slate-800 text-white p-4 flex justify-between items-center">
+          <button onClick={prevMonth} className="p-2 hover:bg-slate-700 rounded-full transition-colors"><ChevronLeft size={24}/></button>
+          <h2 className="text-2xl font-black uppercase tracking-widest">{monthNames[month]} {year}</h2>
+          <button onClick={nextMonth} className="p-2 hover:bg-slate-700 rounded-full transition-colors"><ChevronRight size={24}/></button>
         </div>
-      </div>
 
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800">{filterTab === 'mis_fechas' ? 'Mis Fechas Importantes' : 'Calendario de la Comunidad'}</h2>
-          <p className="text-sm text-slate-500">
-            {filterTab === 'mis_fechas' ? 'Eventos de las materias que estás cursando.' : 'Todas las fechas cargadas por estudiantes.'}
-          </p>
+        <div className="grid grid-cols-7 bg-slate-100 text-center py-3 border-b border-slate-200 font-bold text-slate-500 text-sm">
+          <div>DOM</div><div>LUN</div><div>MAR</div><div>MIE</div><div>JUE</div><div>VIE</div><div>SAB</div>
         </div>
-        <button onClick={() => setShowForm(!showForm)} className="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors shadow-sm flex items-center gap-2 font-medium">
-          {showForm ? <X size={18}/> : <Plus size={18}/>} 
-          <span className="hidden sm:inline">{showForm ? 'Cancelar' : 'Agendar'}</span>
-        </button>
-      </div>
 
-      {showForm && (
-        <form onSubmit={handleAdd} className="bg-white p-5 rounded-xl border border-teal-200 mb-8 grid grid-cols-2 gap-4 shadow-md">
-          <input required placeholder="Título del evento" className="border border-slate-300 p-2 rounded-lg col-span-2 focus:ring-2 focus:ring-teal-500 outline-none" onChange={e => setFormData({...formData, title: e.target.value})} />
-          <select className="border border-slate-300 p-2 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" onChange={e => setFormData({...formData, type: e.target.value})}>
-            <option value="Exam">Examen / Parcial</option>
-            <option value="TP">Trabajo Práctico</option>
-            <option value="Exposicion">Exposición / Presentación</option>
-          </select>
-          <input type="date" required className="border border-slate-300 p-2 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" onChange={e => setFormData({...formData, date: e.target.value})} />
-          <select className="border border-slate-300 p-2 rounded-lg col-span-2 focus:ring-2 focus:ring-teal-500 outline-none" onChange={e => setFormData({...formData, subjectId: e.target.value})}>{subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
-          <button type="submit" className="col-span-2 bg-teal-50 text-teal-700 font-bold py-2.5 rounded-lg hover:bg-teal-100 transition-colors border border-teal-100">Guardar Fecha</button>
-        </form>
-      )}
-      
-      <div className="space-y-3">
-        {displayedEvents.map(ev => {
-           const isExam = ev.type === 'Exam';
-           const isExpo = ev.type === 'Exposicion';
-           const dateObj = new Date(ev.date + "T00:00:00");
-           return (
-            <div key={ev.id} className={`bg-white rounded-xl border flex relative overflow-hidden shadow-sm hover:shadow-md transition-shadow group ${isExam ? 'border-orange-200' : isExpo ? 'border-purple-200' : 'border-blue-200'}`}>
-              {user.uid === ev.authorId && (
-                <button onClick={() => deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'calendar', ev.id))} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-full transition-all opacity-0 group-hover:opacity-100">
-                  <Trash2 size={16}/>
-                </button>
-              )}
-              <div className={`w-24 flex flex-col items-center justify-center border-r p-3 shrink-0 ${isExam ? 'bg-orange-50 border-orange-100' : isExpo ? 'bg-purple-50 border-purple-100' : 'bg-blue-50 border-blue-100'}`}>
-                <span className={`text-xs font-bold uppercase ${isExam ? 'text-orange-600' : isExpo ? 'text-purple-600' : 'text-blue-600'}`}>{dateObj.toLocaleDateString('es-ES', { month: 'short' })}</span>
-                <span className={`text-2xl font-black ${isExam ? 'text-orange-700' : isExpo ? 'text-purple-700' : 'text-blue-700'}`}>{dateObj.getDate()}</span>
-              </div>
-              <div className="pl-4 py-3 pr-10 flex flex-col justify-center w-full">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${isExam ? 'bg-orange-100 text-orange-700' : isExpo ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>{isExam ? 'Examen' : isExpo ? 'Exposición' : 'Entrega'}</span>
+        <div className="grid grid-cols-7 p-2 gap-1 sm:gap-2">
+          {calendarCells.map((cell, index) => {
+            if (!cell) return <div key={`empty-${index}`} className="min-h-[80px] sm:min-h-[100px] p-2"></div>;
+
+            const dayEvents = calendarEvents.filter(e => e.date === cell.dateStr);
+            const myEvents = dayEvents.filter(e => subjectDetails[e.subjectId]?.status === 'cursando' || e.type === 'Especial' || e.authorId === user.uid);
+            const uapEvents = UAP_CALENDAR_2026.filter(e => e.date === cell.dateStr);
+
+            const isSelected = selectedDateStr === cell.dateStr;
+            const isToday = cell.dateStr === new Date().toISOString().split('T')[0];
+
+            return (
+              <div 
+                key={cell.dateStr} onClick={() => handleDayClick(cell.dateStr)}
+                className={`min-h-[80px] sm:min-h-[100px] p-1 sm:p-2 border rounded-xl cursor-pointer transition-all flex flex-col items-center hover:shadow-md
+                  ${isSelected ? 'border-teal-500 ring-2 ring-teal-200 bg-teal-50 shadow-sm' : 'border-slate-100 hover:border-teal-300 bg-white'}
+                  ${uapEvents.some(e=>e.type==='Receso') ? 'bg-slate-50 border-dashed' : ''}`}
+              >
+                <span className={`text-sm sm:text-lg font-bold mb-1 w-8 h-8 flex items-center justify-center rounded-full ${isToday ? 'bg-teal-600 text-white' : 'text-slate-700'}`}>
+                  {cell.day}
+                </span>
+
+                <div className="flex flex-wrap justify-center gap-1 mt-auto w-full">
+                  {uapEvents.map((ue, i) => {
+                    let dotColor = 'bg-indigo-600'; 
+                    if (ue.type === 'Feriado') dotColor = 'bg-amber-700';
+                    if (ue.type === 'Espiritual') dotColor = 'bg-yellow-500';
+                    if (ue.type === 'Receso') dotColor = 'bg-sky-400';
+                    if (ue.type === 'ExamenesUAP') dotColor = 'bg-red-500';
+                    if (ue.type === 'Tramite') dotColor = 'bg-slate-500';
+                    return <div key={`uap-${i}`} className={`w-2.5 h-2.5 rounded-full ${dotColor}`} title={ue.title}></div>
+                  })}
+                  {myEvents.map((me, i) => {
+                     if(i > 2) return null;
+                     let dotColor = 'bg-blue-400';
+                     if (me.type === 'Exam') dotColor = 'bg-orange-500';
+                     if (me.type === 'Exposicion') dotColor = 'bg-purple-500';
+                     if (me.type === 'Especial') dotColor = 'bg-pink-500';
+                     if (me.type === 'Estudio') dotColor = 'bg-emerald-500';
+                     return <div key={`me-${i}`} className={`w-2.5 h-2.5 rounded-full ${dotColor}`} title={me.title}></div>
+                  })}
+                  {myEvents.length > 3 && <span className="text-[9px] text-slate-400 font-bold">+{myEvents.length - 3}</span>}
                 </div>
-                <h4 className="font-bold text-slate-800 leading-tight mb-0.5">{ev.title}</h4>
-                <p className="text-sm text-slate-500 truncate">{subjects.find(s=>s.id===ev.subjectId)?.name}</p>
               </div>
+            );
+          })}
+        </div>
+
+        {/* LEYENDA */}
+        <div className="bg-slate-50 border-t border-slate-200 p-4 sm:p-6">
+          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Referencias Oficiales</h4>
+          <div className="flex flex-wrap gap-x-6 gap-y-3 text-xs sm:text-sm mb-4 pb-4 border-b border-slate-200">
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-amber-700"></div><span className="font-medium text-slate-700">Feriados</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-yellow-500"></div><span className="font-medium text-slate-700">Énfasis Espiritual</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-sky-400"></div><span className="font-medium text-slate-700">Recesos</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-red-500"></div><span className="font-medium text-slate-700">Exámenes UAP</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-indigo-600"></div><span className="font-medium text-slate-700">Institucional</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-slate-500"></div><span className="font-medium text-slate-700">Trámites / Admin</span></div>
+          </div>
+          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Mis Eventos y Comunidad</h4>
+          <div className="flex flex-wrap gap-x-6 gap-y-3 text-xs sm:text-sm">
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-orange-500"></div><span className="font-medium text-slate-700">Mis Exámenes</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-purple-500"></div><span className="font-medium text-slate-700">Exposiciones</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-blue-400"></div><span className="font-medium text-slate-700">Entregas (TP)</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-pink-500"></div><span className="font-medium text-slate-700">Cumpleaños / Especial</span></div>
+          </div>
+        </div>
+      </div>
+
+      {/* ÁREA DE DETALLE DE LA FECHA SELECCIONADA */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 min-h-[300px]">
+        {selectedDateStr ? (
+          <div>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 pb-4 border-b border-slate-100">
+              <div>
+                <h3 className="text-xl font-bold text-teal-700 flex items-center gap-2">
+                  <CalendarDays size={24}/> Agenda del {new Date(selectedDateStr + "T00:00:00").toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+                </h3>
+              </div>
+              <button onClick={() => setShowForm(!showForm)} className={`px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors ${showForm ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' : 'bg-teal-600 text-white hover:bg-teal-700 shadow-sm'}`}>
+                {showForm ? <X size={18}/> : <Plus size={18}/>} {showForm ? 'Cancelar' : 'Agregar Evento aquí'}
+              </button>
             </div>
-          )
-        })}
-        {displayedEvents.length === 0 && (
-          <div className="text-center py-16 bg-white rounded-xl border border-dashed border-slate-300 flex flex-col items-center justify-center">
-            <CalendarDays size={40} className="text-slate-300 mb-3" />
-            <p className="text-slate-500 font-medium">No hay eventos próximos.</p>
-            {filterTab === 'mis_fechas' && <p className="text-xs text-slate-400 mt-1 max-w-sm">Si tienes una fecha importante, agéndala usando el botón de arriba.</p>}
+
+            {showForm && (
+              <form onSubmit={handleAdd} className="bg-teal-50/50 p-5 rounded-xl border border-teal-100 mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2"><label className="block text-sm font-medium text-slate-700 mb-1">Título del Evento</label><input required placeholder="Ej: Parcial de Redacción, Cumple de Juan..." className="w-full border border-slate-300 p-2.5 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} /></div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Tipo de Evento</label>
+                  <select className="w-full border border-slate-300 p-2.5 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
+                    <option value="Exam">🔴 Examen / Parcial</option>
+                    <option value="TP">🔵 Trabajo Práctico (Entrega)</option>
+                    <option value="Exposicion">🟣 Exposición / Presentación</option>
+                    <option value="Estudio">🟢 Juntada de Estudio</option>
+                    <option value="Especial">💖 Cumpleaños / Fecha Especial</option>
+                  </select>
+                </div>
+                {formData.type !== 'Especial' ? (
+                  <div><label className="block text-sm font-medium text-slate-700 mb-1">Materia Asociada</label><select className="w-full border border-slate-300 p-2.5 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" value={formData.subjectId} onChange={e => setFormData({...formData, subjectId: e.target.value})}>{subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select></div>
+                ) : (
+                  <div className="flex items-center"><span className="text-sm font-medium text-pink-600 bg-pink-100 px-3 py-2.5 rounded-lg w-full flex items-center gap-2"><Gift size={18}/> Evento visible para toda la comunidad</span></div>
+                )}
+                <button type="submit" className="sm:col-span-2 bg-teal-600 text-white font-bold py-3 rounded-lg hover:bg-teal-700 transition-colors mt-2">Guardar en el Calendario</button>
+              </form>
+            )}
+
+            <div className="space-y-3">
+              {uapEventsForSelectedDate.map(ue => {
+                let colorClasses = 'border-indigo-200 bg-indigo-50/30';
+                let iconColor = 'bg-indigo-100 text-indigo-700';
+                let typeLabel = 'Académico UAP';
+
+                if (ue.type === 'Feriado') { colorClasses = 'border-amber-200 bg-amber-50/30'; iconColor = 'bg-amber-100 text-amber-700'; typeLabel = 'Feriado Oficial'; } 
+                else if (ue.type === 'Espiritual') { colorClasses = 'border-yellow-200 bg-yellow-50/30'; iconColor = 'bg-yellow-100 text-yellow-700'; typeLabel = 'Énfasis Espiritual'; } 
+                else if (ue.type === 'Receso') { colorClasses = 'border-sky-200 bg-sky-50/30'; iconColor = 'bg-sky-100 text-sky-700'; typeLabel = 'Receso Académico'; } 
+                else if (ue.type === 'ExamenesUAP') { colorClasses = 'border-red-200 bg-red-50/30'; iconColor = 'bg-red-100 text-red-700'; typeLabel = 'Exámenes Finales'; }
+                else if (ue.type === 'Tramite') { colorClasses = 'border-slate-300 bg-slate-50/50'; iconColor = 'bg-slate-200 text-slate-700'; typeLabel = 'Trámite Académico'; }
+
+                return (
+                  <div key={ue.id || ue.title} className={`border p-4 rounded-xl flex items-center gap-4 ${colorClasses}`}>
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${iconColor}`}><Building size={24}/></div>
+                    <div><div className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${iconColor.replace('bg-', 'text-').replace('100', '700')}`}>{typeLabel}</div><h4 className="font-bold text-slate-800 text-lg">{ue.title}</h4></div>
+                  </div>
+                )
+              })}
+
+              {eventsForSelectedDate.map(ev => {
+                 const isOwner = user.uid === ev.authorId;
+                 const isEspecial = ev.type === 'Especial';
+                 const shouldShow = isOwner || isEspecial || subjectDetails[ev.subjectId]?.status === 'cursando';
+                 if (!shouldShow) return null;
+
+                 let colorClasses = 'border-blue-200 bg-blue-50/30'; let icon = <FileText className="text-blue-500"/>; let typeName = 'Entrega / TP';
+                 if (ev.type === 'Exam') { colorClasses = 'border-orange-200 bg-orange-50/30'; icon = <AlertCircle className="text-orange-500"/>; typeName = 'Examen / Parcial'; }
+                 if (ev.type === 'Exposicion') { colorClasses = 'border-purple-200 bg-purple-50/30'; icon = <Users className="text-purple-500"/>; typeName = 'Exposición Oral'; }
+                 if (ev.type === 'Estudio') { colorClasses = 'border-emerald-200 bg-emerald-50/30'; icon = <BookOpen className="text-emerald-500"/>; typeName = 'Estudio Grupal'; }
+                 if (ev.type === 'Especial') { colorClasses = 'border-pink-200 bg-pink-50/30'; icon = <Gift className="text-pink-500"/>; typeName = 'Evento Especial'; }
+
+                 return (
+                  <div key={ev.id} className={`border p-4 rounded-xl flex items-center justify-between gap-4 group ${colorClasses}`}>
+                    <div className="flex items-center gap-4">
+                      <div className="bg-white p-3 rounded-full shadow-sm">{icon}</div>
+                      <div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{typeName}</div>
+                        <h4 className="font-bold text-slate-800 text-lg leading-tight">{ev.title}</h4>
+                        {!isEspecial && <p className="text-sm text-slate-600 mt-0.5">{subjects.find(s=>s.id===ev.subjectId)?.name}</p>}
+                      </div>
+                    </div>
+                    {isOwner && (
+                      <button onClick={() => deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'calendar', ev.id))} className="text-slate-400 hover:text-red-500 bg-white p-2 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-all"><Trash2 size={18}/></button>
+                    )}
+                  </div>
+                )
+              })}
+
+              {eventsForSelectedDate.length === 0 && uapEventsForSelectedDate.length === 0 && !showForm && (
+                <div className="text-center py-10">
+                  <CalendarDays size={48} className="mx-auto text-slate-200 mb-3" />
+                  <p className="text-slate-500 font-medium text-lg">Día libre de eventos</p>
+                  <p className="text-slate-400 text-sm mt-1">¡Toca "Agregar Evento aquí" si quieres agendar algo!</p>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full text-center py-20">
+            <div className="bg-teal-50 p-6 rounded-full mb-4">
+              <Calendar size={48} className="text-teal-300" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-700 mb-2">Selecciona una fecha</h3>
+            <p className="text-slate-500 max-w-sm">Toca cualquier día en el calendario de arriba para ver sus detalles o agregar nuevos parciales, entregas y cumpleaños.</p>
           </div>
         )}
       </div>
+
     </div>
   );
 }
@@ -847,22 +916,17 @@ function CalendarView({ user, calendarEvents, subjects, subjectDetails }) {
 function ScheduleView({ user, scheduleItems, availabilityItems, subjects, subjectDetails }) {
   const [subTab, setSubTab] = useState('classes'); 
   const [showForm, setShowForm] = useState(false);
-  const [groupFilter, setGroupFilter] = useState(''); // Nuevo filtro de búsqueda para grupos
+  const [groupFilter, setGroupFilter] = useState(''); 
   
   const [classFormData, setClassFormData] = useState({ subjectId: subjects[0].id, dayOfWeek: 'Lunes', startTime: '14:00', endTime: '16:00', classroom: '' });
   const [availFormData, setAvailFormData] = useState({ userName: user.displayName || '', groupName: '', dayOfWeek: 'Lunes', startTime: '16:00', endTime: '18:00' });
 
-  // Solo de Lunes a Viernes
   const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
-  // FILTRO 1: Mis Materias
-  // Revisa la base de datos general y devuelve SOLO los horarios de las materias que marco como "Cursando"
   const myClassItems = useMemo(() => {
     return scheduleItems.filter(item => subjectDetails[item.subjectId]?.status === 'cursando');
   }, [scheduleItems, subjectDetails]);
 
-  // FILTRO 2: Mi Grupo de TP
-  // Si hay algo escrito en el buscador, muestra solo los horarios de ese grupo específico
   const myGroupItems = useMemo(() => {
     if (!groupFilter.trim()) return availabilityItems;
     return availabilityItems.filter(item => item.groupName?.toLowerCase() === groupFilter.trim().toLowerCase());
@@ -891,8 +955,8 @@ function ScheduleView({ user, scheduleItems, availabilityItems, subjects, subjec
     <div className="max-w-6xl mx-auto animate-in fade-in duration-500">
       <div className="flex justify-center mb-8">
         <div className="bg-slate-200 p-1 rounded-xl inline-flex shadow-inner">
-          <button onClick={() => { setSubTab('classes'); setShowForm(false); }} className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${subTab === 'classes' ? 'bg-white text-teal-700 shadow' : 'text-slate-600 hover:text-slate-800'}`}><Clock size={16} /> Mis Horarios de Cursada</button>
-          <button onClick={() => { setSubTab('availability'); setShowForm(false); }} className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${subTab === 'availability' ? 'bg-white text-green-700 shadow' : 'text-slate-600 hover:text-slate-800'}`}><Users size={16} /> Disponibilidad de Grupos</button>
+          <button onClick={() => { setSubTab('classes'); setShowForm(false); }} className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${subTab === 'classes' ? 'bg-white text-teal-700 shadow' : 'text-slate-600 hover:text-slate-800'}`}><Clock size={16} /> Mis Horarios</button>
+          <button onClick={() => { setSubTab('availability'); setShowForm(false); }} className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${subTab === 'availability' ? 'bg-white text-green-700 shadow' : 'text-slate-600 hover:text-slate-800'}`}><Users size={16} /> Grupos de TP</button>
         </div>
       </div>
 
@@ -900,38 +964,24 @@ function ScheduleView({ user, scheduleItems, availabilityItems, subjects, subjec
         <div>
           <h2 className="text-2xl font-bold text-slate-800">{subTab === 'classes' ? 'Mis Horarios de Cursada' : 'Disponibilidad para Trabajos'}</h2>
           <p className="text-sm text-slate-500 mt-1">
-            {subTab === 'classes' 
-              ? 'Aquí verás exclusivamente los horarios de las materias que tienes marcadas como "Cursando".' 
-              : 'Escribe el nombre de tu grupo para ver cuándo pueden juntarse a hacer TPs.'}
+            {subTab === 'classes' ? 'Viendo solo materias marcadas como "Cursando".' : 'Busca a tu grupo para organizar el TP.'}
           </p>
         </div>
-        
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          {/* BUSCADOR DE GRUPOS */}
           {subTab === 'availability' && !showForm && (
             <div className="relative flex-1 sm:w-64">
               <Users size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input 
-                type="text" placeholder="Ej: Grupo Los Pumas" 
-                className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none text-sm font-medium"
-                value={groupFilter} onChange={e => setGroupFilter(e.target.value)}
-              />
+              <input type="text" placeholder="Ej: Grupo Los Pumas" className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none text-sm font-medium" value={groupFilter} onChange={e => setGroupFilter(e.target.value)} />
             </div>
           )}
-          <button onClick={() => setShowForm(!showForm)} className={`shrink-0 ${subTab === 'classes' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-green-600 hover:bg-green-700'} text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm`}>
-            {showForm ? <X size={18}/> : <Plus size={18}/>} 
-            <span className="hidden sm:inline">{showForm ? 'Cancelar' : 'Agregar'}</span>
-          </button>
+          <button onClick={() => setShowForm(!showForm)} className={`shrink-0 ${subTab === 'classes' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-green-600 hover:bg-green-700'} text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm`}>{showForm ? <X size={18}/> : <Plus size={18}/>} <span className="hidden sm:inline">{showForm ? 'Cancelar' : 'Agregar'}</span></button>
         </div>
       </div>
 
       {showForm && subTab === 'classes' && (
         <form onSubmit={handleAddSchedule} className="bg-white p-5 rounded-xl shadow-md border border-slate-200 mb-8 border-t-4 border-t-teal-500">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="md:col-span-3">
-              <label className="block text-sm font-medium mb-1">Materia (Cargar horario general)</label>
-              <select className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-teal-500" value={classFormData.subjectId} onChange={e => setClassFormData({...classFormData, subjectId: e.target.value})}>{subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
-            </div>
+            <div className="md:col-span-3"><label className="block text-sm font-medium mb-1">Materia</label><select className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-teal-500" value={classFormData.subjectId} onChange={e => setClassFormData({...classFormData, subjectId: e.target.value})}>{subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select></div>
             <div><label className="block text-sm font-medium mb-1">Día</label><select className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-teal-500" value={classFormData.dayOfWeek} onChange={e => setClassFormData({...classFormData, dayOfWeek: e.target.value})}>{DAYS.map(d => <option key={d} value={d}>{d}</option>)}</select></div>
             <div><label className="block text-sm font-medium mb-1">Desde - Hasta</label><div className="flex items-center gap-2"><input type="time" required className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-teal-500" value={classFormData.startTime} onChange={e => setClassFormData({...classFormData, startTime: e.target.value})}/><span>-</span><input type="time" required className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-teal-500" value={classFormData.endTime} onChange={e => setClassFormData({...classFormData, endTime: e.target.value})}/></div></div>
             <div><label className="block text-sm font-medium mb-1">Aula</label><input type="text" placeholder="Ej: Aula 5" className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-teal-500" value={classFormData.classroom} onChange={e => setClassFormData({...classFormData, classroom: e.target.value})}/></div>
@@ -944,7 +994,7 @@ function ScheduleView({ user, scheduleItems, availabilityItems, subjects, subjec
         <form onSubmit={handleAddAvailability} className="bg-white p-5 rounded-xl shadow-md border border-slate-200 mb-8 border-t-4 border-t-green-500">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div><label className="block text-sm font-medium mb-1">Tu Nombre</label><input type="text" required placeholder="Tu Nombre" className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" value={availFormData.userName} onChange={e => setAvailFormData({...availFormData, userName: e.target.value})}/></div>
-            <div><label className="block text-sm font-medium mb-1">Nombre de tu Grupo (Exacto)</label><input type="text" required placeholder="Ej: Grupo Los Pumas" className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" value={availFormData.groupName} onChange={e => setAvailFormData({...availFormData, groupName: e.target.value})}/></div>
+            <div><label className="block text-sm font-medium mb-1">Nombre de tu Grupo</label><input type="text" required placeholder="Ej: Grupo Los Pumas" className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" value={availFormData.groupName} onChange={e => setAvailFormData({...availFormData, groupName: e.target.value})}/></div>
             <div><label className="block text-sm font-medium mb-1">Día Libre</label><select className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" value={availFormData.dayOfWeek} onChange={e => setAvailFormData({...availFormData, dayOfWeek: e.target.value})}>{DAYS.map(d => <option key={d} value={d}>{d}</option>)}</select></div>
             <div><label className="block text-sm font-medium mb-1">Desde - Hasta</label><div className="flex items-center gap-2"><input type="time" required className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" value={availFormData.startTime} onChange={e => setAvailFormData({...availFormData, startTime: e.target.value})}/><span>-</span><input type="time" required className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" value={availFormData.endTime} onChange={e => setAvailFormData({...availFormData, endTime: e.target.value})}/></div></div>
           </div>
@@ -954,11 +1004,7 @@ function ScheduleView({ user, scheduleItems, availabilityItems, subjects, subjec
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {DAYS.map(day => {
-          // Usamos nuestras nuevas listas filtradas en lugar de las globales
-          const dayItems = (subTab === 'classes' ? myClassItems : myGroupItems)
-            .filter(item => item.dayOfWeek === day)
-            .sort((a, b) => a.startTime.localeCompare(b.startTime));
-
+          const dayItems = (subTab === 'classes' ? myClassItems : myGroupItems).filter(item => item.dayOfWeek === day).sort((a, b) => a.startTime.localeCompare(b.startTime));
           return (
             <div key={day} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col min-h-[150px]">
               <div className={`${subTab === 'classes' ? 'bg-slate-100' : 'bg-green-50'} py-2 text-center border-b border-slate-200`}><h3 className={`font-bold uppercase text-sm tracking-wider ${subTab === 'classes' ? 'text-slate-700' : 'text-green-800'}`}>{day}</h3></div>
@@ -1002,24 +1048,17 @@ function ChatView({ user, chatMessages, subjectDetails, subjects }) {
   const [msg, setMsg] = useState('');
   const messagesEndRef = useRef(null);
 
-  // Obtener las materias que el usuario marcó como "Cursando"
   const cursandoSubjects = useMemo(() => {
     return subjects.filter(s => subjectDetails[s.id]?.status === 'cursando');
   }, [subjectDetails, subjects]);
 
-  // Estado para saber qué sala está abierta (por defecto la primera que cursa)
   const [activeRoom, setActiveRoom] = useState(cursandoSubjects.length > 0 ? cursandoSubjects[0].id : null);
 
-  // Si cambia la lista de cursando, asegurar que haya una sala activa
   useEffect(() => {
-    if (cursandoSubjects.length > 0 && !cursandoSubjects.find(s => s.id === activeRoom)) {
-      setActiveRoom(cursandoSubjects[0].id);
-    } else if (cursandoSubjects.length === 0) {
-      setActiveRoom(null);
-    }
+    if (cursandoSubjects.length > 0 && !cursandoSubjects.find(s => s.id === activeRoom)) setActiveRoom(cursandoSubjects[0].id);
+    else if (cursandoSubjects.length === 0) setActiveRoom(null);
   }, [cursandoSubjects]);
 
-  // Filtrar los mensajes globales para mostrar solo los de la materia activa
   const currentMessages = useMemo(() => {
     return chatMessages.filter(m => m.subjectId === activeRoom);
   }, [chatMessages, activeRoom]);
@@ -1031,21 +1070,15 @@ function ChatView({ user, chatMessages, subjectDetails, subjects }) {
     e.preventDefault();
     if (!msg.trim() || !activeRoom) return;
     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'chat'), {
-      text: msg,
-      subjectId: activeRoom, // Guardamos a qué materia pertenece el mensaje
-      authorId: user.uid,
-      authorName: user.displayName || 'Estudiante',
-      timestamp: Date.now()
+      text: msg, subjectId: activeRoom, authorId: user.uid, authorName: user.displayName || 'Estudiante', timestamp: Date.now()
     });
     setMsg('');
   };
 
-  // Pantalla de bloqueo si no está cursando nada
   if (cursandoSubjects.length === 0) {
     return (
       <div className="max-w-3xl mx-auto h-[600px] flex flex-col items-center justify-center bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
-        <Users size={64} className="text-slate-300 mb-4" />
-        <h2 className="text-2xl font-bold text-slate-700 mb-2">Salas de Chat Bloqueadas</h2>
+        <Users size={64} className="text-slate-300 mb-4" /><h2 className="text-2xl font-bold text-slate-700 mb-2">Salas de Chat Bloqueadas</h2>
         <p className="text-slate-500">No estás cursando ninguna materia en este momento. Ve a "Mi Plan de Estudios" y marca una o más materias como <span className="font-bold text-yellow-600">"Cursando actualmente"</span> para unirte a sus grupos de chat.</p>
       </div>
     );
@@ -1053,33 +1086,18 @@ function ChatView({ user, chatMessages, subjectDetails, subjects }) {
 
   return (
     <div className="max-w-5xl mx-auto h-[600px] flex bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-      
-      {/* SIDEBAR DE MATERIAS */}
       <div className="w-1/3 sm:w-1/4 border-r border-slate-200 bg-slate-50 flex flex-col">
-        <div className="bg-teal-700 p-4 text-white shadow-sm z-10 flex items-center gap-2">
-          <Users size={18} />
-          <h2 className="font-bold text-sm">Tus Grupos</h2>
-        </div>
+        <div className="bg-teal-700 p-4 text-white shadow-sm z-10 flex items-center gap-2"><Users size={18} /><h2 className="font-bold text-sm">Tus Grupos</h2></div>
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
           {cursandoSubjects.map(sub => (
-            <button 
-              key={sub.id}
-              onClick={() => setActiveRoom(sub.id)}
-              className={`w-full text-left p-3 rounded-lg text-sm font-medium transition-colors ${activeRoom === sub.id ? 'bg-teal-100 text-teal-800 shadow-sm border border-teal-200' : 'text-slate-600 hover:bg-slate-200 border border-transparent'}`}
-            >
+            <button key={sub.id} onClick={() => setActiveRoom(sub.id)} className={`w-full text-left p-3 rounded-lg text-sm font-medium transition-colors ${activeRoom === sub.id ? 'bg-teal-100 text-teal-800 shadow-sm border border-teal-200' : 'text-slate-600 hover:bg-slate-200 border border-transparent'}`}>
               <div className="line-clamp-2 leading-tight">{sub.name}</div>
             </button>
           ))}
         </div>
       </div>
-
-      {/* ÁREA DE MENSAJES */}
       <div className="w-2/3 sm:w-3/4 flex flex-col bg-white">
-        <div className="bg-teal-600 p-4 text-white flex items-center gap-2 shadow-md z-10">
-          <MessageSquare size={20} /> 
-          <h2 className="font-bold truncate">{subjects.find(s => s.id === activeRoom)?.name}</h2>
-        </div>
-        
+        <div className="bg-teal-600 p-4 text-white flex items-center gap-2 shadow-md z-10"><MessageSquare size={20} /> <h2 className="font-bold truncate">{subjects.find(s => s.id === activeRoom)?.name}</h2></div>
         <div className="flex-1 overflow-y-auto p-4 bg-slate-50/50 flex flex-col gap-3">
           {currentMessages.length === 0 && <div className="text-center mt-20 text-slate-400">No hay mensajes en esta materia aún. ¡Rompe el hielo y di hola!</div>}
           {currentMessages.map(m => {
@@ -1087,24 +1105,17 @@ function ChatView({ user, chatMessages, subjectDetails, subjects }) {
             return (
               <div key={m.id} className={`flex flex-col max-w-[85%] ${isMe ? 'self-end items-end' : 'self-start items-start'}`}>
                 <span className="text-[10px] text-slate-400 mb-0.5 px-1 font-medium">{m.authorName}</span>
-                <div className={`px-4 py-2 rounded-2xl ${isMe ? 'bg-teal-500 text-white rounded-tr-none' : 'bg-white border shadow-sm rounded-tl-none text-slate-700'}`}>
-                  {m.text}
-                </div>
+                <div className={`px-4 py-2 rounded-2xl ${isMe ? 'bg-teal-500 text-white rounded-tr-none' : 'bg-white border shadow-sm rounded-tl-none text-slate-700'}`}>{m.text}</div>
               </div>
             );
           })}
           <div ref={messagesEndRef} />
         </div>
-
         <form onSubmit={handleSend} className="p-3 bg-white border-t flex gap-2">
-          <input 
-            type="text" value={msg} onChange={e => setMsg(e.target.value)} placeholder="Escribe un mensaje al grupo..."
-            className="flex-1 border-slate-300 border rounded-full px-4 py-2 outline-none focus:border-teal-500" 
-          />
+          <input type="text" value={msg} onChange={e => setMsg(e.target.value)} placeholder="Escribe un mensaje al grupo..." className="flex-1 border-slate-300 border rounded-full px-4 py-2 outline-none focus:border-teal-500" />
           <button type="submit" className="bg-teal-500 hover:bg-teal-600 text-white p-3 rounded-full transition-colors"><Send size={18}/></button>
         </form>
       </div>
-
     </div>
   );
 }
@@ -1124,22 +1135,13 @@ function FocusView({ user, activeStream, setActiveStream, customStreams }) {
   const handleAddStream = async (e) => {
     e.preventDefault();
     if (!streamData.title || !streamData.url) return;
-    
     let embedUrl = streamData.url;
-    // Convierte enlace de YT a formato iframe
     if (embedUrl.includes('youtube.com/watch') || embedUrl.includes('youtu.be/')) {
       const videoId = embedUrl.split('v=')[1]?.split('&')[0] || embedUrl.split('youtu.be/')[1]?.split('?')[0];
       if (videoId) embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
     }
-
     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'streams'), {
-      title: streamData.title,
-      url: embedUrl,
-      category: 'Comunidad',
-      desc: `Añadido por ${user.displayName?.split(' ')[0] || 'Usuario'}`,
-      color: 'bg-teal-100 text-teal-700',
-      authorId: user.uid,
-      createdAt: Date.now()
+      title: streamData.title, url: embedUrl, category: 'Comunidad', desc: `Añadido por ${user.displayName?.split(' ')[0] || 'Usuario'}`, color: 'bg-teal-100 text-teal-700', authorId: user.uid, createdAt: Date.now()
     });
     setStreamData({ title: '', url: '' }); setShowForm(false);
   };
@@ -1155,13 +1157,7 @@ function FocusView({ user, activeStream, setActiveStream, customStreams }) {
       <Headphones size={48} className="mx-auto text-teal-300 mb-4" />
       <h2 className="text-2xl font-bold text-slate-800 mb-2">Elige tu música de estudio</h2>
       <p className="text-slate-500 mb-8">Escucha las estaciones por defecto o añade enlaces de YouTube a la colección.</p>
-      
-      <div className="flex justify-center mb-8">
-        <button onClick={() => setShowForm(!showForm)} className="bg-teal-600 text-white px-5 py-2.5 rounded-lg hover:bg-teal-700 transition-colors flex items-center gap-2 shadow-sm font-medium">
-          <Plus size={18} /> Añadir Playlist de YouTube
-        </button>
-      </div>
-
+      <div className="flex justify-center mb-8"><button onClick={() => setShowForm(!showForm)} className="bg-teal-600 text-white px-5 py-2.5 rounded-lg hover:bg-teal-700 transition-colors flex items-center gap-2 shadow-sm font-medium"><Plus size={18} /> Añadir Playlist</button></div>
       {showForm && (
         <form onSubmit={handleAddStream} className="bg-white p-5 rounded-xl border border-teal-200 mb-8 grid grid-cols-1 md:grid-cols-2 gap-4 shadow-md max-w-2xl mx-auto text-left">
           <div><label className="block text-sm font-medium text-slate-700 mb-1">Nombre de la Playlist</label><input required placeholder="Ej: Rock instrumental" className="w-full border border-slate-300 p-2.5 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" value={streamData.title} onChange={e => setStreamData({...streamData, title: e.target.value})} /></div>
@@ -1169,23 +1165,15 @@ function FocusView({ user, activeStream, setActiveStream, customStreams }) {
           <button type="submit" className="md:col-span-2 bg-teal-50 text-teal-700 font-bold py-2.5 rounded-lg hover:bg-teal-100 transition-colors border border-teal-100">Compartir con la comunidad</button>
         </form>
       )}
-
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
         {[...STREAMS, ...customStreams].map(stream => {
           const isOwner = stream.authorId && user.uid === stream.authorId;
           return (
             <div key={stream.id} className="relative group">
-              {isOwner && (
-                <button onClick={(e) => { e.stopPropagation(); handleDeleteStream(stream.id, stream.authorId); }} className="absolute top-2 right-2 p-1.5 bg-white rounded-full text-slate-300 hover:text-red-500 hover:bg-red-50 shadow-sm z-10 opacity-0 group-hover:opacity-100 transition-all border border-slate-200"><Trash2 size={14} /></button>
-              )}
-              <button onClick={() => setActiveStream(stream)}
-                className={`w-full h-full p-4 rounded-xl border-2 text-left transition-all flex flex-col ${activeStream?.id === stream.id ? 'border-teal-500 bg-teal-50 shadow-md ring-2 ring-teal-100' : 'bg-white hover:border-teal-300 hover:shadow-sm border-slate-200'}`}>
-                <div className="flex justify-between w-full items-start mb-2">
-                  <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wide border ${stream.color}`}>{stream.category}</span>
-                  <PlayCircle className={activeStream?.id === stream.id ? 'text-teal-600' : 'text-slate-300'} size={18} />
-                </div>
-                <h4 className="font-bold text-slate-800 leading-tight mb-1">{stream.title}</h4>
-                <p className="text-[11px] text-slate-500 line-clamp-1">{stream.desc}</p>
+              {isOwner && (<button onClick={(e) => { e.stopPropagation(); handleDeleteStream(stream.id, stream.authorId); }} className="absolute top-2 right-2 p-1.5 bg-white rounded-full text-slate-300 hover:text-red-500 hover:bg-red-50 shadow-sm z-10 opacity-0 group-hover:opacity-100 transition-all border border-slate-200"><Trash2 size={14} /></button>)}
+              <button onClick={() => setActiveStream(stream)} className={`w-full h-full p-4 rounded-xl border-2 text-left transition-all flex flex-col ${activeStream?.id === stream.id ? 'border-teal-500 bg-teal-50 shadow-md ring-2 ring-teal-100' : 'bg-white hover:border-teal-300 hover:shadow-sm border-slate-200'}`}>
+                <div className="flex justify-between w-full items-start mb-2"><span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wide border ${stream.color}`}>{stream.category}</span><PlayCircle className={activeStream?.id === stream.id ? 'text-teal-600' : 'text-slate-300'} size={18} /></div>
+                <h4 className="font-bold text-slate-800 leading-tight mb-1">{stream.title}</h4><p className="text-[11px] text-slate-500 line-clamp-1">{stream.desc}</p>
               </button>
             </div>
           );
