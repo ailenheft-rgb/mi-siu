@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Check, Lock, Unlock, GraduationCap, AlertCircle, Calendar, Folder, BookOpen, Plus, ExternalLink, Trash2, CalendarDays, Clock, Users, Headphones, PlayCircle, Radio, X, Save, FileText, LogOut, MessageSquare, Send, Trophy, XCircle, User, Building, CalendarPlus, ChevronLeft, ChevronRight, Gift, Moon, Sun, Play, Pause, RotateCcw, Brain, Coffee, AlarmClock } from 'lucide-react';
+import { Check, Lock, Unlock, GraduationCap, AlertCircle, Calendar, Folder, BookOpen, Plus, ExternalLink, Trash2, CalendarDays, Clock, Users, Headphones, PlayCircle, Radio, X, Save, FileText, LogOut, MessageSquare, Send, Trophy, XCircle, User, Building, CalendarPlus, ChevronLeft, ChevronRight, Gift, Moon, Sun, Play, Pause, RotateCcw, Brain, Coffee, AlarmClock, Calculator, Target, Percent } from 'lucide-react';
 
 // --- FIREBASE IMPORTS ---
 import { initializeApp } from 'firebase/app';
@@ -165,21 +165,21 @@ const UAP_CALENDAR_2026 = [
   { date: '2026-10-22', title: '2º Semana de Oración', type: 'Espiritual' }, { date: '2026-10-23', title: '2º Semana de Oración', type: 'Espiritual' },
   { date: '2026-10-24', title: '2º Semana de Oración / Sáb. Creación', type: 'Espiritual' }, { date: '2026-11-21', title: 'Culto Acción de Gracias', type: 'Espiritual' },
 
-  { date: '2026-06-27', title: 'Receso Escolar', type: 'Receso' }, { date: '2026-06-28', title: 'Receso Escolar', type: 'Receso' },
-  { date: '2026-06-29', title: 'Receso Escolar', type: 'Receso' }, { date: '2026-06-30', title: 'Receso Escolar', type: 'Receso' },
-  { date: '2026-07-01', title: 'Receso Escolar', type: 'Receso' }, { date: '2026-07-02', title: 'Receso Escolar', type: 'Receso' },
-  { date: '2026-07-03', title: 'Receso Escolar', type: 'Receso' }, { date: '2026-07-04', title: 'Receso Escolar', type: 'Receso' },
-  { date: '2026-07-05', title: 'Receso Escolar', type: 'Receso' }, { date: '2026-07-06', title: 'Receso Escolar', type: 'Receso' },
-  { date: '2026-07-07', title: 'Receso Escolar', type: 'Recesso' },
+  { date: '2026-06-26', title: 'Receso Escolar', type: 'Receso' }, { date: '2026-06-27', title: 'Receso Escolar', type: 'Receso' },
+  { date: '2026-06-28', title: 'Receso Escolar', type: 'Receso' }, { date: '2026-06-29', title: 'Receso Escolar', type: 'Receso' },
+  { date: '2026-06-30', title: 'Receso Escolar', type: 'Receso' }, { date: '2026-07-01', title: 'Receso Escolar', type: 'Receso' },
+  { date: '2026-07-02', title: 'Receso Escolar', type: 'Receso' }, { date: '2026-07-03', title: 'Receso Escolar', type: 'Receso' },
+  { date: '2026-07-04', title: 'Receso Escolar', type: 'Receso' }, { date: '2026-07-05', title: 'Receso Escolar', type: 'Receso' },
+  { date: '2026-07-06', title: 'Receso Escolar', type: 'Receso' }, { date: '2026-07-07', title: 'Receso Escolar', type: 'Receso' },
   { date: '2026-07-08', title: 'Receso Escolar', type: 'Receso' }, { date: '2026-07-09', title: 'Receso Escolar', type: 'Receso' },
-  { date: '2026-07-10', title: 'Receso Escolar', type: 'Receso' }, { date: '2026-12-18', title: 'Receso Verano', type: 'Receso' }, 
-  { date: '2026-12-19', title: 'Receso Verano', type: 'Receso' }, { date: '2026-12-20', title: 'Receso Verano', type: 'Receso' }, 
-  { date: '2026-12-21', title: 'Receso Verano', type: 'Receso' }, { date: '2026-12-22', title: 'Receso Verano', type: 'Receso' }, 
-  { date: '2026-12-23', title: 'Receso Verano', type: 'Receso' }, { date: '2026-12-24', title: 'Receso Verano', type: 'Receso' }, 
-  { date: '2026-12-25', title: 'Receso Verano', type: 'Receso' }, { date: '2026-12-26', title: 'Receso Verano', type: 'Receso' }, 
-  { date: '2026-12-27', title: 'Receso Verano', type: 'Receso' }, { date: '2026-12-28', title: 'Receso Verano', type: 'Receso' }, 
-  { date: '2026-12-29', title: 'Receso Verano', type: 'Receso' }, { date: '2026-12-30', title: 'Receso Verano', type: 'Receso' }, 
-  { date: '2026-12-31', title: 'Receso Verano', type: 'Receso' },
+  { date: '2026-07-10', title: 'Receso Escolar', type: 'Receso' },
+  { date: '2026-12-18', title: 'Receso Verano', type: 'Receso' }, { date: '2026-12-19', title: 'Receso Verano', type: 'Receso' },
+  { date: '2026-12-20', title: 'Receso Verano', type: 'Receso' }, { date: '2026-12-21', title: 'Receso Verano', type: 'Receso' },
+  { date: '2026-12-22', title: 'Receso Verano', type: 'Receso' }, { date: '2026-12-23', title: 'Receso Verano', type: 'Receso' },
+  { date: '2026-12-24', title: 'Receso Verano', type: 'Receso' }, { date: '2026-12-25', title: 'Receso Verano', type: 'Receso' },
+  { date: '2026-12-26', title: 'Receso Verano', type: 'Receso' }, { date: '2026-12-27', title: 'Receso Verano', type: 'Receso' },
+  { date: '2026-12-28', title: 'Receso Verano', type: 'Receso' }, { date: '2026-12-29', title: 'Receso Verano', type: 'Receso' },
+  { date: '2026-12-30', title: 'Receso Verano', type: 'Receso' }, { date: '2026-12-31', title: 'Receso Verano', type: 'Receso' },
 
   { date: '2026-03-23', title: 'Examen Diagnóstico Inglés', type: 'ExamenesUAP' }, { date: '2026-08-18', title: 'Examen Diagnóstico Inglés', type: 'ExamenesUAP' },
   { date: '2026-07-13', title: 'Exámenes Finales 1er Cuat.', type: 'ExamenesUAP' }, { date: '2026-07-14', title: 'Exámenes Finales 1er Cuat.', type: 'ExamenesUAP' },
@@ -422,6 +422,7 @@ export default function StudyPlanTracker() {
           </div>
           <div className="flex gap-2 mt-6 overflow-x-auto pb-0 hide-scrollbar items-end">
             <TabButton isDarkMode={isDarkMode} active={activeTab === 'plan'} onClick={() => setActiveTab('plan')} icon={<BookOpen size={18} />} label="Mi Plan" />
+            <TabButton isDarkMode={isDarkMode} active={activeTab === 'predictor'} onClick={() => setActiveTab('predictor')} icon={<Calculator size={18} />} label="Simulador" />
             <TabButton isDarkMode={isDarkMode} active={activeTab === 'vault'} onClick={() => setActiveTab('vault')} icon={<Folder size={18} />} label="Bóveda" />
             <TabButton isDarkMode={isDarkMode} active={activeTab === 'calendar'} onClick={() => setActiveTab('calendar')} icon={<CalendarDays size={18} />} label="Calendario" />
             <TabButton isDarkMode={isDarkMode} active={activeTab === 'schedule'} onClick={() => setActiveTab('schedule')} icon={<Clock size={18} />} label="Horarios" />
@@ -433,6 +434,7 @@ export default function StudyPlanTracker() {
 
       <main className="max-w-6xl mx-auto px-4 py-8">
         {activeTab === 'plan' && <PlanView isDarkMode={isDarkMode} subjectsByGroup={subjectsByGroup} completedSubjects={completedSubjects} subjectDetails={subjectDetails} getSubjectStatus={getSubjectStatus} onSubjectClick={handleSubjectClick} />}
+        {activeTab === 'predictor' && <PredictorView isDarkMode={isDarkMode} />}
         {activeTab === 'vault' && <VaultView isDarkMode={isDarkMode} user={user} vaultItems={vaultItems} subjects={INITIAL_SUBJECTS} />}
         {activeTab === 'calendar' && <CalendarView isDarkMode={isDarkMode} user={user} calendarEvents={calendarEvents} subjects={INITIAL_SUBJECTS} subjectDetails={subjectDetails} />}
         {activeTab === 'schedule' && <ScheduleView isDarkMode={isDarkMode} user={user} scheduleItems={scheduleItems} availabilityItems={availabilityItems} subjects={INITIAL_SUBJECTS} subjectDetails={subjectDetails} />}
@@ -456,6 +458,147 @@ function TabButton({ active, onClick, icon, label, isDarkMode }) {
   const bgActive = isDarkMode ? 'bg-slate-950 text-teal-400 border-t-4 border-teal-500 shadow-[0_-4px_10px_rgba(0,0,0,0.5)]' : 'bg-slate-50 text-teal-800 border-t-4 border-teal-500 shadow-md';
   const bgInactive = isDarkMode ? 'bg-slate-900/40 text-teal-300/60 hover:bg-slate-900 hover:text-teal-300 mb-1' : 'bg-white/10 text-teal-50 hover:bg-white/20 hover:text-white backdrop-blur-sm mb-1';
   return <button onClick={onClick} className={`flex items-center gap-2 px-4 py-3 font-medium transition-all text-sm whitespace-nowrap rounded-t-xl ${active ? bgActive : bgInactive}`}>{icon} {label}</button>;
+}
+
+// ==========================================
+// VIEW: SIMULADOR DE NOTAS (PREDICTIONS)
+// ==========================================
+function PredictorView({ isDarkMode }) {
+  const bgCard = isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200';
+  const textPrimary = isDarkMode ? 'text-white' : 'text-slate-800';
+  const textSec = isDarkMode ? 'text-slate-400' : 'text-slate-500';
+  const inputBg = isDarkMode ? 'bg-slate-950 border-slate-700 text-white placeholder-slate-600' : 'bg-white border-slate-300 text-slate-900';
+
+  // State: Parciales
+  const [grades, setGrades] = useState(['', '']); 
+  const [targetGrade, setTargetGrade] = useState(8); // Por defecto Promoción
+  
+  const addGradeInput = () => setGrades([...grades, '']);
+  const updateGrade = (index, val) => {
+    const newGrades = [...grades];
+    newGrades[index] = val;
+    setGrades(newGrades);
+  };
+  const removeGradeInput = (index) => {
+    setGrades(grades.filter((_, i) => i !== index));
+  };
+
+  const validGrades = grades.map(g => parseFloat(g)).filter(g => !isNaN(g));
+  const currentAvg = validGrades.length > 0 ? (validGrades.reduce((a, b) => a + b, 0) / validGrades.length) : 0;
+  
+  // Math: (Sum + X) / (N+1) = Target => X = Target * (N+1) - Sum
+  const currentSum = validGrades.reduce((a, b) => a + b, 0);
+  const neededNext = (targetGrade * (validGrades.length + 1)) - currentSum;
+
+  let partialMessage = "";
+  if (validGrades.length === 0) partialMessage = "Ingresa tus notas actuales arriba.";
+  else if (neededNext > 10) partialMessage = `Necesitas un ${neededNext.toFixed(1)}. ¡Imposible alcanzar la meta solo con un examen!`;
+  else if (neededNext <= 1) partialMessage = `¡Ya lo lograste! Incluso sacando un 1 alcanzas tu meta.`;
+  else partialMessage = `Necesitas sacar un ${neededNext.toFixed(1)} en el próximo parcial para llegar a tu meta.`;
+
+  // State: Finales
+  const [cursada, setCursada] = useState('');
+  const [pesoFinal, setPesoFinal] = useState(50);
+  const [notaAprobacion, setNotaAprobacion] = useState(6);
+
+  // Math: (Cursada * (1-peso)) + (Final * peso) = Meta => Final = (Meta - Cursada * (1-peso)) / peso
+  const pDecimal = pesoFinal / 100;
+  const cursadaNum = parseFloat(cursada);
+  let finalNeeded = null;
+  if (!isNaN(cursadaNum) && pDecimal > 0) {
+    finalNeeded = (notaAprobacion - (cursadaNum * (1 - pDecimal))) / pDecimal;
+  }
+
+  return (
+    <div className="max-w-5xl mx-auto animate-in fade-in duration-500">
+      <div className="text-center mb-10">
+        <Calculator size={48} className={`mx-auto mb-4 ${isDarkMode ? 'text-teal-500' : 'text-teal-600'}`} />
+        <h2 className={`text-3xl font-bold mb-2 ${textPrimary}`}>Simulador de Notas</h2>
+        <p className={textSec}>Calcula exactamente qué necesitas en tu próximo examen o final.</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* PARCIALES */}
+        <div className={`p-6 sm:p-8 rounded-2xl border shadow-sm ${bgCard}`}>
+          <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200/20">
+            <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-teal-900/50 text-teal-400' : 'bg-teal-100 text-teal-700'}`}><Target size={24} /></div>
+            <h3 className={`text-xl font-bold ${textPrimary}`}>Calculadora de Parciales</h3>
+          </div>
+
+          <div className="space-y-4 mb-6">
+            {grades.map((grade, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <label className={`font-medium w-20 shrink-0 ${textSec}`}>Nota {index + 1}:</label>
+                <input type="number" min="1" max="10" placeholder="Ej: 7" className={`flex-1 p-2.5 rounded-lg border outline-none focus:ring-2 focus:ring-teal-500 ${inputBg}`} value={grade} onChange={e => updateGrade(index, e.target.value)} />
+                {grades.length > 1 && (
+                  <button onClick={() => removeGradeInput(index)} className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'text-slate-500 hover:bg-slate-800 hover:text-red-400' : 'text-slate-400 hover:bg-slate-100 hover:text-red-500'}`}><Trash2 size={18} /></button>
+                )}
+              </div>
+            ))}
+            <button onClick={addGradeInput} className={`text-sm font-bold flex items-center gap-1 mt-2 ${isDarkMode ? 'text-teal-400 hover:text-teal-300' : 'text-teal-600 hover:text-teal-700'}`}><Plus size={16}/> Agregar otro parcial</button>
+          </div>
+
+          <div className={`p-4 rounded-xl mb-6 ${isDarkMode ? 'bg-slate-950 border border-slate-800' : 'bg-slate-50 border border-slate-200'}`}>
+            <label className={`block text-sm font-bold mb-2 ${textPrimary}`}>Mi meta es:</label>
+            <select className={`w-full p-2.5 rounded-lg border outline-none focus:ring-2 focus:ring-teal-500 ${inputBg}`} value={targetGrade} onChange={e => setTargetGrade(parseFloat(e.target.value))}>
+              <option value={8}>🏆 Promocionar la materia (Promedio 8)</option>
+              <option value={6}>📝 Regularizar la materia (Promedio 6)</option>
+              <option value={7}>✨ Promedio 7</option>
+              <option value={9}>🎓 Promedio 9</option>
+            </select>
+          </div>
+
+          <div className={`p-5 rounded-xl border text-center ${isDarkMode ? 'bg-teal-900/20 border-teal-800/50' : 'bg-teal-50 border-teal-100'}`}>
+            <p className={`text-sm font-bold uppercase tracking-wide mb-1 ${isDarkMode ? 'text-teal-500' : 'text-teal-600'}`}>Promedio Actual: {currentAvg.toFixed(2)}</p>
+            <h4 className={`text-lg font-bold leading-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{partialMessage}</h4>
+          </div>
+        </div>
+
+        {/* FINALES PONDERADOS */}
+        <div className={`p-6 sm:p-8 rounded-2xl border shadow-sm ${bgCard}`}>
+          <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200/20">
+            <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-purple-900/50 text-purple-400' : 'bg-purple-100 text-purple-700'}`}><Percent size={24} /></div>
+            <h3 className={`text-xl font-bold ${textPrimary}`}>Simulador de Examen Final</h3>
+          </div>
+          <p className={`text-sm mb-6 ${textSec}`}>Calcula qué nota necesitas en un final que vale un porcentaje específico de tu nota definitiva.</p>
+
+          <div className="space-y-5 mb-6">
+            <div>
+              <label className={`block text-sm font-medium mb-1 ${textPrimary}`}>Nota final de Cursada</label>
+              <input type="number" min="1" max="10" placeholder="Ej: 7.5" className={`w-full p-2.5 rounded-lg border outline-none focus:ring-2 focus:ring-purple-500 ${inputBg}`} value={cursada} onChange={e => setCursada(e.target.value)} />
+            </div>
+            <div>
+              <label className={`block text-sm font-medium mb-1 ${textPrimary}`}>¿Cuánto vale el Final? (%)</label>
+              <div className="flex items-center gap-3">
+                <input type="range" min="10" max="90" step="10" className="flex-1 accent-purple-500" value={pesoFinal} onChange={e => setPesoFinal(parseInt(e.target.value))} />
+                <span className={`font-bold w-12 text-right ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>{pesoFinal}%</span>
+              </div>
+            </div>
+            <div>
+              <label className={`block text-sm font-medium mb-1 ${textPrimary}`}>Nota mínima de aprobación en la materia</label>
+              <select className={`w-full p-2.5 rounded-lg border outline-none focus:ring-2 focus:ring-purple-500 ${inputBg}`} value={notaAprobacion} onChange={e => setNotaAprobacion(parseFloat(e.target.value))}>
+                <option value={6}>Se aprueba con 6</option>
+                <option value={7}>Se aprueba con 7</option>
+                <option value={4}>Se aprueba con 4</option>
+              </select>
+            </div>
+          </div>
+
+          <div className={`p-5 rounded-xl border text-center ${isDarkMode ? 'bg-purple-900/20 border-purple-800/50' : 'bg-purple-50 border-purple-100'}`}>
+            {!finalNeeded ? (
+              <p className={isDarkMode ? 'text-slate-400' : 'text-slate-500'}>Ingresa tu nota de cursada para calcular.</p>
+            ) : finalNeeded > 10 ? (
+              <h4 className={`text-lg font-bold leading-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Necesitas un {finalNeeded.toFixed(1)}. ¡Matemáticamente no te alcanza para aprobar!</h4>
+            ) : finalNeeded <= 1 ? (
+              <h4 className={`text-lg font-bold leading-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Con presentarte y sacar un 1, ya estás aprobado.</h4>
+            ) : (
+              <h4 className={`text-lg font-bold leading-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Necesitas sacar un <span className={isDarkMode ? 'text-purple-400 text-2xl' : 'text-purple-600 text-2xl'}>{finalNeeded.toFixed(1)}</span> en el examen final.</h4>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ==========================================
@@ -779,7 +922,7 @@ function CalendarView({ user, calendarEvents, subjects, subjectDetails, isDarkMo
         </div>
 
         {/* LEYENDA */}
-        <div className={`border-t p-4 sm:p-6 ${isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+        <div className={`border-t p-4 sm:p-6 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
           <h4 className={`text-xs font-bold uppercase tracking-wider mb-3 ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>Referencias Oficiales</h4>
           <div className={`flex flex-wrap gap-x-6 gap-y-3 text-xs sm:text-sm mb-4 pb-4 border-b ${isDarkMode ? 'border-slate-800' : 'border-slate-200'}`}>
             <div className="flex items-center gap-2"><div className={`w-3 h-3 rounded-full ${isDarkMode ? 'bg-amber-500' : 'bg-amber-700'}`}></div><span className={`font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>Feriados</span></div>
@@ -803,13 +946,13 @@ function CalendarView({ user, calendarEvents, subjects, subjectDetails, isDarkMo
       <div className={`rounded-2xl shadow-sm border p-6 min-h-[300px] ${bgCard}`}>
         {selectedDateStr ? (
           <div>
-            <div className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 pb-4 border-b ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
+            <div className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 pb-4 border-b ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}>
               <div>
                 <h3 className={`text-xl font-bold flex items-center gap-2 ${isDarkMode ? 'text-teal-400' : 'text-teal-600'}`}>
                   <CalendarDays size={24}/> Agenda del {new Date(selectedDateStr + "T00:00:00").toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </h3>
               </div>
-              <button onClick={() => setShowForm(!showForm)} className={`px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors ${showForm ? (isDarkMode ? 'bg-slate-800 text-slate-300' : 'bg-slate-200 text-slate-700') : (isDarkMode ? 'bg-teal-700 text-white hover:bg-teal-600' : 'bg-teal-600 text-white hover:bg-teal-700 shadow-sm')}`}>
+              <button onClick={() => setShowForm(!showForm)} className={`px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors ${showForm ? (isDarkMode ? 'bg-slate-700 text-slate-300' : 'bg-slate-200 text-slate-700') : (isDarkMode ? 'bg-teal-700 text-white hover:bg-teal-600' : 'bg-teal-600 text-white hover:bg-teal-700 shadow-sm')}`}>
                 {showForm ? <X size={18}/> : <Plus size={18}/>} {showForm ? 'Cancelar' : 'Agregar Evento aquí'}
               </button>
             </div>
@@ -846,12 +989,12 @@ function CalendarView({ user, calendarEvents, subjects, subjectDetails, isDarkMo
                 else if (ue.type === 'Espiritual') { colorClasses = isDarkMode ? 'border-yellow-900/50 bg-yellow-900/20' : 'border-yellow-200 bg-yellow-50/30'; iconColor = isDarkMode ? 'bg-yellow-900/50 text-yellow-500' : 'bg-yellow-100 text-yellow-700'; typeLabel = 'Énfasis Espiritual'; } 
                 else if (ue.type === 'Receso') { colorClasses = isDarkMode ? 'border-sky-900/50 bg-sky-900/20' : 'border-sky-200 bg-sky-50/30'; iconColor = isDarkMode ? 'bg-sky-900/50 text-sky-400' : 'bg-sky-100 text-sky-700'; typeLabel = 'Receso Académico'; } 
                 else if (ue.type === 'ExamenesUAP') { colorClasses = isDarkMode ? 'border-red-900/50 bg-red-900/20' : 'border-red-200 bg-red-50/30'; iconColor = isDarkMode ? 'bg-red-900/50 text-red-500' : 'bg-red-100 text-red-700'; typeLabel = 'Exámenes Finales'; }
-                else if (ue.type === 'Tramite') { colorClasses = isDarkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-300 bg-slate-50/50'; iconColor = isDarkMode ? 'bg-slate-800 text-slate-400' : 'bg-slate-200 text-slate-700'; typeLabel = 'Trámite Académico'; }
+                else if (ue.type === 'Tramite') { colorClasses = isDarkMode ? 'border-slate-700 bg-slate-800' : 'border-slate-300 bg-slate-50/50'; iconColor = isDarkMode ? 'bg-slate-700 text-slate-300' : 'bg-slate-200 text-slate-700'; typeLabel = 'Trámite Académico'; }
 
                 return (
                   <div key={ue.id || ue.title} className={`border p-4 rounded-xl flex items-center gap-4 ${colorClasses}`}>
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${iconColor}`}><Building size={24}/></div>
-                    <div><div className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${isDarkMode ? iconColor.split(' ')[1] : iconColor.replace('bg-', 'text-').replace('100', '700')}`}>{typeLabel}</div><h4 className={`font-bold text-lg ${textPrimary}`}>{ue.title}</h4></div>
+                    <div><div className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${iconColor.split(' ')[1]}`}>{typeLabel}</div><h4 className={`font-bold text-lg ${textPrimary}`}>{ue.title}</h4></div>
                   </div>
                 )
               })}
@@ -872,15 +1015,15 @@ function CalendarView({ user, calendarEvents, subjects, subjectDetails, isDarkMo
                  return (
                   <div key={ev.id} className={`border p-4 rounded-xl flex items-center justify-between gap-4 group ${colorClasses}`}>
                     <div className="flex items-center gap-4">
-                      <div className={`p-3 rounded-full shadow-sm ${isDarkMode ? 'bg-slate-900/80' : 'bg-white'}`}>{icon}</div>
+                      <div className={`p-3 rounded-full shadow-sm ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>{icon}</div>
                       <div>
-                        <div className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{typeName}</div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{typeName}</div>
                         <h4 className={`font-bold text-lg leading-tight ${textPrimary}`}>{ev.title}</h4>
                         {!isEspecial && <p className={`text-sm mt-0.5 ${isDarkMode ? 'text-slate-500' : 'text-slate-600'}`}>{subjects.find(s=>s.id===ev.subjectId)?.name}</p>}
                       </div>
                     </div>
                     {isOwner && (
-                      <button onClick={() => deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'calendar', ev.id))} className={`p-2 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-all hover:text-red-500 ${isDarkMode ? 'bg-slate-800 text-slate-500' : 'bg-white text-slate-400'}`}><Trash2 size={18}/></button>
+                      <button onClick={() => deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'calendar', ev.id))} className={`hover:text-red-500 p-2 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-all ${isDarkMode ? 'bg-slate-800 text-slate-400' : 'bg-white text-slate-400'}`}><Trash2 size={18}/></button>
                     )}
                   </div>
                 )
@@ -888,9 +1031,9 @@ function CalendarView({ user, calendarEvents, subjects, subjectDetails, isDarkMo
 
               {eventsForSelectedDate.length === 0 && uapEventsForSelectedDate.length === 0 && !showForm && (
                 <div className="text-center py-10">
-                  <CalendarDays size={48} className={`mx-auto mb-3 ${isDarkMode ? 'text-slate-800' : 'text-slate-200'}`} />
-                  <p className={`font-medium text-lg ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>Día libre de eventos</p>
-                  <p className={`text-sm mt-1 ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>¡Toca "Agregar Evento aquí" si quieres agendar algo!</p>
+                  <CalendarDays size={48} className={`mx-auto mb-3 ${isDarkMode ? 'text-slate-700' : 'text-slate-200'}`} />
+                  <p className={`font-medium text-lg ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Día libre de eventos</p>
+                  <p className="text-slate-500 text-sm mt-1">¡Toca "Agregar Evento aquí" si quieres agendar algo!</p>
                 </div>
               )}
             </div>
@@ -1189,7 +1332,6 @@ function FocusView({ user, activeStream, setActiveStream, customStreams, isDarkM
   const [showForm, setShowForm] = useState(false);
   const [streamData, setStreamData] = useState({ title: '', url: '' });
 
-  // Agregamos una base para los colores en claro y oscuro de las tarjetas
   const STREAMS = [
     { id: 'lofi-1', category: 'Lo-Fi', title: 'Lofi Girl (Beats)', desc: 'Beats relajantes para estudiar', url: 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1', colorLight: 'bg-purple-100 text-purple-700', colorDark: 'bg-purple-900/40 text-purple-400 border border-purple-800/50' },
     { id: 'inst-1', category: 'Instrumental', title: 'Piano Clásico (3 Hs)', desc: 'Concentración profunda', url: 'https://www.youtube.com/embed/WJ3-F02-F_Y?autoplay=1', colorLight: 'bg-blue-100 text-blue-700', colorDark: 'bg-blue-900/40 text-blue-400 border border-blue-800/50' },
@@ -1221,9 +1363,6 @@ function FocusView({ user, activeStream, setActiveStream, customStreams, isDarkM
 
   return (
     <div className="max-w-4xl mx-auto text-center animate-in fade-in duration-500">
-      
-      <PomodoroTimer isDarkMode={isDarkMode} />
-
       <h2 className={`text-2xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Música de Estudio</h2>
       <p className={`mb-8 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Escucha las estaciones por defecto o añade enlaces de YouTube a la colección comunitaria.</p>
       
@@ -1241,7 +1380,7 @@ function FocusView({ user, activeStream, setActiveStream, customStreams, isDarkM
         </form>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto mb-10">
         {[...STREAMS, ...customStreams].map(stream => {
           const isOwner = stream.authorId && user.uid === stream.authorId;
           const isActive = activeStream?.id === stream.id;
@@ -1252,7 +1391,7 @@ function FocusView({ user, activeStream, setActiveStream, customStreams, isDarkM
                 <button onClick={(e) => { e.stopPropagation(); handleDeleteStream(stream.id, stream.authorId); }} className={`absolute top-2 right-2 p-1.5 rounded-full hover:text-red-500 shadow-sm z-10 opacity-0 group-hover:opacity-100 transition-all border ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700' : 'bg-white border-slate-200 text-slate-300 hover:bg-red-50'}`}><Trash2 size={14} /></button>
               )}
               <button onClick={() => setActiveStream(stream)} className={`w-full h-full p-4 rounded-xl border-2 text-left transition-all flex flex-col ${isActive ? (isDarkMode ? 'border-teal-500 bg-teal-900/20 shadow-[0_0_15px_rgba(20,184,166,0.15)]' : 'border-teal-500 bg-teal-50 shadow-md ring-2 ring-teal-100') : (isDarkMode ? 'bg-slate-900 border-slate-800 hover:border-teal-700' : 'bg-white hover:border-teal-300 hover:shadow-sm border-slate-200')}`}>
-                <div className="flex justify-between w-full items-start mb-2"><span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wide ${isDarkMode ? stream.colorDark : stream.colorLight}`}>{stream.category}</span><PlayCircle className={isActive ? 'text-teal-500' : (isDarkMode ? 'text-slate-600' : 'text-slate-300')} size={18} /></div>
+                <div className="flex justify-between w-full items-start mb-2"><span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wide border ${isDarkMode ? stream.colorDark : stream.colorLight}`}>{stream.category}</span><PlayCircle className={isActive ? 'text-teal-500' : (isDarkMode ? 'text-slate-600' : 'text-slate-300')} size={18} /></div>
                 <h4 className={`font-bold leading-tight mb-1 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{stream.title}</h4>
                 <p className={`text-[11px] line-clamp-1 ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>{stream.desc}</p>
               </button>
@@ -1260,6 +1399,8 @@ function FocusView({ user, activeStream, setActiveStream, customStreams, isDarkM
           );
         })}
       </div>
+      
+      <PomodoroTimer isDarkMode={isDarkMode} />
     </div>
   );
 }
