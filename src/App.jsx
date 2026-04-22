@@ -579,7 +579,7 @@ function PredictorView({ isDarkMode }) {
               <select className={`w-full p-2.5 rounded-lg border outline-none focus:ring-2 focus:ring-purple-500 ${inputBg}`} value={notaAprobacion} onChange={e => setNotaAprobacion(parseFloat(e.target.value))}>
                 <option value={6}>Se aprueba con 6</option>
                 <option value={7}>Se aprueba con 7</option>
-                <option value={4}>Se aprueba con 4</option>
+                <option value={8}>Se aprueba con 8</option>
               </select>
             </div>
           </div>
